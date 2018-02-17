@@ -19,6 +19,7 @@ library(plyr)
 
 rm(list=ls())
 setwd("~/GitHub/open-climate-change/")
+setwd('/Users/robins64/Documents/git_repos/open-climate-change')
 
 j.dat<-read.csv("./Data/JournalList_Scopus.csv",stringsAsFactors = F,na.strings=c(NA,""))
 
