@@ -27,15 +27,10 @@ scop$OA<-ifelse(is.na(scop$Journal.Open.Access), FALSE, TRUE)
 
 ### Need to subset to relevant climate + ecology journals
 
-journals<-c('....')
+journals<-read.csv(file='Data/climate_journals.csv')
 
-scop<-scop[scop$Source.title %in% journals,]
+scop<-scop[scop$Source.title %in% journals$journal,]
 dim(scop)
 
 
 save(scop, file='Data/scopus_OA_climate_clean.Rdata')
-
-
-
-dim(scop)
-head(scop)
