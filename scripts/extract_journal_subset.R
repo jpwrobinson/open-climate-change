@@ -27,11 +27,15 @@ scop$OA<-ifelse(is.na(scop$Journal.Open.Access), FALSE, TRUE)
 
 ## remove inactive journals
 scop$active<-j.dat$Active.or.Inactive[match(scop$Source.title, j.dat$Source.Title)]
-scop<-scop[scop$active=='Active',]
+scop<-scop[which(scop$active=='Active'),]
 
 t<-aggregate(Authors ~ Source.title, scop, length)
 
 ## fair to just take the journals with highest number of papers?
 journal.list<-t$Source.title[t$Authors>300] ## n = 53
+journal.list<-data.frame(journal=journal.list)
+## add ISSN for altmetric search
+journal.list$ISSN<-j.dat$E.ISSN[match(journal.list$journal, j.dat$Source.Title)]
+journal.list$ISSN[is.na(journal.list$ISSN)]<-j.dat$Print.ISSN[match(journal.list$journal[is.na(journal.list$ISSN)], j.dat$Source.Title)]
 
 write.csv(journal.list, file='Data/climate_journals.csv')
