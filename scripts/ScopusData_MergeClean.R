@@ -50,6 +50,28 @@ dat$Access.Type[is.na(dat$Access.Type)]<-"Closed"
 dat$Access.Type[which(dat$Access.Type=="DOAJ/ROAD Open Access")]<-"Open Access"
 names(dat)[which(names(dat)=="Access.Type")]<-"Article.Open.Access"
 
+##########
+# creating cleaner version of full data for analysis. Use big csv for paper referencing if necessary
+dat$X...Authors <- NULL
+dat$Title <- NULL
+dat$Volume <- NULL
+dat$Art..No. <- NULL
+dat$Page.start <- NULL
+dat$Page.end <- NULL
+dat$Page.count <- NULL
+dat$Link <- NULL
+dat$Source <- NULL
+dat$EID <- NULL
+dat$Publisher.s.Country <- NULL
+
+## add OA identifier
+dat$OA<-ifelse(dat$Article.Open.Access== "Closed", FALSE, TRUE)
+
+## remove inactive journals
+dat$active<-j.dat$Active.or.Inactive[match(dat$Source.title, j.dat$Source.Title)]
+dat<-dat[which(dat$active=='Active'),]
+##########
+
 ## Write out cleaned up data
 write.csv(dat,"./Data/ScopusOAData_20180214TT.csv",row.names = F)
 
@@ -163,61 +185,6 @@ save(scop, file='Data/scopus_OA_climate_clean.Rdata')
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-## EXTRA STUFF NOT EDITED
-dat<-dat[which(dat$X2016.CiteScore <= median(j.dat$X2016.CiteScore,na.rm=T)),]
-
-dat<-dat[which(dat$X2016.CiteScore <= 40),]
-
-summary(j.dat$X2016.CiteScore,na.rm=T)
-
-
-
-sum.dat<-ddply(dat,.(Access.Type,Year),summarize,
-               CiteAve = mean(Cited.by,na.rm=T),
-               Citevar = var(Cited.by,na.rm=T),
-               CiteN = length(Cited.by))
-
-tdat<-ddply(dat,.(Year),summarize,
-            NTotal = length(Cited.by))
-
-sum.dat<-merge(sum.dat,tdat,by.x="Year",by.y="Year",all.x=T)
-sum.dat$PropOA<-sum.dat$CiteN/sum.dat$NTotal*100
-
-
-
-
-
-
-str(dat)
-
-fit1<-lm(Cited.by~as.factor(Year)*Access.Type,data=dat)
-summary(fit1)
-anova(fit1)
-
-fit1<-lm(Cited.by~Year*Access.Type,data=dat)
-summary(fit1)
-anova(fit1)
-
-
-fit2<-lm(Cited.by~Access.Type,data=dat)
-summary(fit2)
-anova(fit2)
-
-fit3<-lm(Cited.by~as.factor(Year)+Access.Type,data=dat)
-summary(fit3)
-anova(fit3)
 
 
 
