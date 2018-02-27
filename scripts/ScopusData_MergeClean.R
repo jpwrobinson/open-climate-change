@@ -3,7 +3,7 @@
 
 ####################
 #
-# Open access climate change papers
+# Open access climate change papers - Merge and clean raw data
 #
 # 2018/02/05
 #
@@ -136,6 +136,11 @@ scop<-scop[scop$Source.title %in% journals$journal,]
 dim(scop)
 
 save(scop, file='Data/scopus_OA_climate_clean.Rdata')
+
+
+
+
+
 
 
 
