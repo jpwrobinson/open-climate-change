@@ -33,12 +33,20 @@ head(full.scop)
 dat<-scop
 dat$Cited.by[which(is.na(dat$Cited.by))]<-0
 
-nrow(dat[which(dat$Cited.by==0),])
-dat<-dat[which(dat$Cited.by>0),]
+#nrow(dat[which(dat$Cited.by==0),])
+#dat<-dat[which(dat$Cited.by>0),]
 
 
 jour.dat<-dat[,c("Source.title","X2016.CiteScore","X2016.SJR","X2016.SNIP","Journal.Open.Access")]
 jour.dat<-jour.dat[-which(duplicated(jour.dat)),]
+
+
+## plot data
+p1<-ggplot(dat)
+p1 + geom_boxplot(aes(x=as.factor(Year), y=log(Cited.by+1), colour=Open.Access))
+p1 + geom_boxplot(aes(x=as.factor(Year), y=log(Cited.by+1), colour=Open.Access),
+                  outlier.shape=NA)
+
 
 
 ####################################
@@ -84,11 +92,28 @@ p1 + theme_classic() +
 ## FIT MIXED EFFECTS MODEL ##
 
 fit1a<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year) + (1|Source.title), data=dat)
-anova(fit1a,fit1a)
-summary(fit1a)
 
-coef1<-summary(fit1a)$coefficients
+fit1b<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year), data=dat)
+fit1c<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Source.title), data=dat)
+fit1d<-lmer(Cited.by ~ Open.Access + (1|Year) + (1|Source.title), data=dat)
+fit1e<-lmer(Cited.by ~ Open.Access + (1|Year), data=dat)
+fit1f<-lmer(Cited.by ~ Open.Access + (1|Source.title), data=dat)
+fit1g<-lmer(Cited.by ~ 1 + (1|Year) + (1|Source.title), data=dat)
+fit1h<-lm(Cited.by ~ Open.Access*jour.bin, data=dat)
 
+fit1i<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year) + (jour.bin|Source.title), data=dat)
+summary(fit1i)
+
+
+anova(fit1a,fit1b,fit1c,fit1d,fit1e,fit1f,fit1g)
+anova(fit1a,fit1d,fit1e)
+
+
+mod.fit<-fit1i  ## choose model to plot
+
+summary(mod.fit)
+
+coef1<-summary(mod.fit)$coefficients
 out.fit1<-data.frame(Open.Access = rep(c("Closed","Open access"),each=4),
                      jour.bin = rep(c(LETTERS[1:4]),times=2))
 out.fit1$estimate<-c(coef1[1,1], 
@@ -107,18 +132,7 @@ out.fit1$error<-c(coef1[1,2],
                   coef1[6,2],
                   coef1[7,2],
                   coef1[8,2])
-
-fit1b<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year), data=dat)
-fit1c<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Source.title), data=dat)
-fit1d<-lmer(Cited.by ~ Open.Access + (1|Year) + (1|Source.title), data=dat)
-fit1e<-lmer(Cited.by ~ Open.Access + (1|Year), data=dat)
-fit1f<-lmer(Cited.by ~ Open.Access + (1|Source.title), data=dat)
-fit1g<-lmer(Cited.by ~ 1 + (1|Year) + (1|Source.title), data=dat)
-fit1h<-lm(Cited.by ~ Open.Access*jour.bin, data=dat)
-
-
-anova(fit1a,fit1b,fit1c,fit1d,fit1e,fit1f,fit1g)
-anova(fit1a,fit1d,fit1e)
+out.fit1
 
 
 ## plot output of coefficients and estimates
@@ -139,14 +153,12 @@ pf1
 ## fit model to continuous journal ranking
 
 fit2<-lmer(Cited.by ~ Open.Access*X2016.SJR + (1|Year) + (1|Source.title), data=dat)
-anova(fit2)
 summary(fit2)
-AIC(fit2)
 
 fit3<-lmer(Cited.by ~ Open.Access*X2016.SJR*Year + (1|Source.title), data=dat)
-anova(fit3)
 summary(fit3)
-AIC(fit3)
+
+anova(fit2,fit3,fit1a)
 
 # find journal ranking where lines interesct
 j.int<-summary(fit2)$coefficients[2,1]/-summary(fit2)$coefficients[4,1]
