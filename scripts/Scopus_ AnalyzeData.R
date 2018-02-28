@@ -24,10 +24,18 @@ setwd('/Users/robins64/Documents/git_repos/open-climate-change')
 
 ## load data
 load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - journals with > 300 papers in last 10 years
-head(scop)
+full.scop<-read.csv("./Data/ScopusOAData_20180214TT.csv",stringsAsFactors = F)
 
+head(scop)
+head(full.scop)
+
+## choose filtered data or full data
 dat<-scop
 dat$Cited.by[which(is.na(dat$Cited.by))]<-0
+
+nrow(dat[which(dat$Cited.by==0),])
+dat<-dat[which(dat$Cited.by>0),]
+
 
 jour.dat<-dat[,c("Source.title","X2016.CiteScore","X2016.SJR","X2016.SNIP","Journal.Open.Access")]
 jour.dat<-jour.dat[-which(duplicated(jour.dat)),]
@@ -49,7 +57,7 @@ Jour.Var<-"X2016.SJR"     ## Use this
 #Jour.Var<-"X2016.SNIP"
 
 bins<-quantile(jour.dat[,Jour.Var],na.rm=T)  ##quantile bins
-bins<-c(0,1,2,5,20)
+#bins<-c(0,1,2,5,20)
 
 dat$jour.bin<-cut(dat[,Jour.Var],breaks = bins,labels = LETTERS[1:(length(bins)-1)])
 dat$jour.bin[which(is.na(dat$jour.bin))]<-"A"
@@ -58,6 +66,10 @@ sum.dat2<-ddply(dat,.(Open.Access,Year,jour.bin),summarize,
                 CiteAve = mean(Cited.by,na.rm=T),
                 CiteVar = var(Cited.by,na.rm=T),
                 CiteN = length(Cited.by))
+
+sum.dat2a<-ddply(sum.dat2,.(jour.bin),summarize,
+                 N = sum(CiteN))
+sum.dat2a$PropN<-sum.dat2a$N/sum(sum.dat2a$N)
 
 ## Plots by journal ranking bins
 p1<-ggplot(dat)
@@ -69,58 +81,72 @@ p1 + theme_classic() +
   facet_wrap(~jour.bin,nrow = 2,ncol = 2, scales="free")
 
 
+## FIT MIXED EFFECTS MODEL ##
 
-
-
-## bin for article citation numbers
-bins<-quantile(dat$Cited.by,na.rm=T)  ##quantile bins
-bins<-c(0.000,0.99,100,1000,3000)
-
-dat$cite.bin<-cut(dat$Cited.by,breaks = bins,labels = LETTERS[1:(length(bins)-1)])
-dat$cite.bin[which(is.na(dat$cite.bin))]<-"A"
-
-
-bins1<-quantile(dat$Cited.by[which(dat$Open.Access=="Open access")],na.rm=T)  ##quantile bins
-bins2<-quantile(dat$Cited.by[which(dat$Open.Access=="Closed")],na.rm=T)  ##quantile bins
-
-dat$cite.bin<-cut(dat$Cited.by,breaks = bins,labels = LETTERS[1:(length(bins)-1)])
-dat$cite.bin[which(is.na(dat$cite.bin))]<-"A"
-
-
-
-
-sum.dat2<-ddply(dat,.(Open.Access,Year,cite.bin),summarize,
-                CiteAve = mean(Cited.by,na.rm=T),
-                CiteVar = var(Cited.by,na.rm=T),
-                CiteN = length(Cited.by))
-
-## Plots
-p1<-ggplot(dat)
-quartz(width=8,height = 5)
-p1 + theme_classic() + 
-  geom_boxplot(aes(x=as.factor(Year),y=log(Cited.by+1),colour=Open.Access),
-               outlier.shape=NA) +
-  facet_wrap(~cite.bin,nrow = 2,ncol = 2, scales="free")
-
-
-
-
-## RUN MODEL ##
-
-fit1a<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year), data=dat)
-anova(fit1a)
+fit1a<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year) + (1|Source.title), data=dat)
+anova(fit1a,fit1a)
 summary(fit1a)
 
-fit1b<-lmer(Cited.by ~ 0 + Open.Access*jour.bin + (1|Year), data=dat)
-anova(fit1b)
-summary(fit1b)
+coef1<-summary(fit1a)$coefficients
+
+out.fit1<-data.frame(Open.Access = rep(c("Closed","Open access"),each=4),
+                     jour.bin = rep(c(LETTERS[1:4]),times=2))
+out.fit1$estimate<-c(coef1[1,1], 
+                     coef1[1,1] + coef1[3,1], 
+                     coef1[1,1] + coef1[4,1],
+                     coef1[1,1] + coef1[5,1],
+                     coef1[1,1] + coef1[2,1],
+                     coef1[1,1] + coef1[2,1] + coef1[3,1] + coef1[6,1],
+                     coef1[1,1] + coef1[2,1] + coef1[4,1] + coef1[7,1],
+                     coef1[1,1] + coef1[2,1] + coef1[5,1] + coef1[8,1])
+out.fit1$error<-c(coef1[1,2], 
+                  coef1[3,2],
+                  coef1[4,2],
+                  coef1[5,2],
+                  coef1[2,2],
+                  coef1[6,2],
+                  coef1[7,2],
+                  coef1[8,2])
+
+fit1b<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year), data=dat)
+fit1c<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Source.title), data=dat)
+fit1d<-lmer(Cited.by ~ Open.Access + (1|Year) + (1|Source.title), data=dat)
+fit1e<-lmer(Cited.by ~ Open.Access + (1|Year), data=dat)
+fit1f<-lmer(Cited.by ~ Open.Access + (1|Source.title), data=dat)
+fit1g<-lmer(Cited.by ~ 1 + (1|Year) + (1|Source.title), data=dat)
+fit1h<-lm(Cited.by ~ Open.Access*jour.bin, data=dat)
 
 
-fit2<-lmer(Cited.by ~ Open.Access*X2016.SJR + (1|Year), data=dat)
+anova(fit1a,fit1b,fit1c,fit1d,fit1e,fit1f,fit1g)
+anova(fit1a,fit1d,fit1e)
+
+
+## plot output of coefficients and estimates
+
+pfit1<-ggplot(out.fit1)
+
+pf1<-pfit1 + 
+  xlab("Journal ranking bin (quantiles)") + ylab("Citations") + 
+  geom_pointrange(aes(x=jour.bin, y=estimate, 
+                      ymin=(estimate-error), ymax=(estimate+error),
+                      colour=Open.Access))
+
+pf1
+
+
+
+
+## fit model to continuous journal ranking
+
+fit2<-lmer(Cited.by ~ Open.Access*X2016.SJR + (1|Year) + (1|Source.title), data=dat)
 anova(fit2)
 summary(fit2)
+AIC(fit2)
 
-
+fit3<-lmer(Cited.by ~ Open.Access*X2016.SJR*Year + (1|Source.title), data=dat)
+anova(fit3)
+summary(fit3)
+AIC(fit3)
 
 # find journal ranking where lines interesct
 j.int<-summary(fit2)$coefficients[2,1]/-summary(fit2)$coefficients[4,1]
@@ -135,7 +161,7 @@ nrow(dat[which(dat$X2016.SJR<j.int),])/nrow(dat)
 p2<-ggplot(dat)
 p2 + geom_smooth(aes(x=Year,y=log(Cited.by+1),col=Open.Access))
 
-p2 + geom_smooth(aes(x=X2016.SJR,y=log(Cited.by+1),col=Open.Access))
+p2 + geom_smooth(aes(x=X2016.SJR,y=log(Cited.by+1),col=Open.Access),method="glm")
 
 
 
@@ -150,6 +176,36 @@ p2 + geom_smooth(aes(x=X2016.SJR,y=log(Cited.by+1),col=Open.Access))
 
 
 
+
+
+
+
+
+
+
+
+## EXTRA STUFF for now
+
+## bin for article citation numbers
+bins<-quantile(dat$Cited.by,na.rm=T)  ##quantile bins
+#bins<-c(0.000,0.99,100,1000,3000)
+
+dat$cite.bin<-cut(dat$Cited.by,breaks = bins,labels = LETTERS[1:(length(bins)-1)])
+dat$cite.bin[which(is.na(dat$cite.bin))]<-"A"
+
+
+sum.dat2<-ddply(dat,.(Open.Access,Year,cite.bin),summarize,
+                CiteAve = mean(Cited.by,na.rm=T),
+                CiteVar = var(Cited.by,na.rm=T),
+                CiteN = length(Cited.by))
+
+## Plots
+p1<-ggplot(dat)
+quartz(width=8,height = 5)
+p1 + theme_classic() + 
+  geom_boxplot(aes(x=as.factor(Year),y=log(Cited.by+1),colour=Open.Access),
+               outlier.shape=NA) +
+  facet_wrap(~cite.bin,nrow = 2,ncol = 2, scales="free")
 
 
 
