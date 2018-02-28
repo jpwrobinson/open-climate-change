@@ -13,6 +13,8 @@ library(ggplot2)
 library(grid)
 library(gridExtra)
 library(plyr)
+library(lme4)
+library(visreg)
 
 ## clean data and merge with journal metric data
 
@@ -21,63 +23,116 @@ setwd("~/GitHub/open-climate-change/")
 setwd('/Users/robins64/Documents/git_repos/open-climate-change')
 
 ## load data
-load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - top 30 journals
-dat<-read.csv("./Data/ScopusOAData_20180214TT.csv",na.strings=F)  ## cleaned data
+load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - journals with > 300 papers in last 10 years
+dat<-read.csv("./Data/ScopusOAData_20180214TT.csv",stringsAsFactors = F)  ## cleaned data
 
 head(scop)
 head(dat)
 
+dat<-scop
+dat$Cited.by[which(is.na(dat$Cited.by))]<-0
+
+jour.dat<-dat[,c("Source.title","X2016.CiteScore","X2016.SJR","X2016.SNIP","Journal.Open.Access")]
+jour.dat<-jour.dat[-which(duplicated(jour.dat)),]
 
 
+####################################
+#
+# Analyze all data
 
-
-
-
-
-
-## EXTRA STUFF NOT EDITED
-dat<-dat[which(dat$X2016.CiteScore <= median(j.dat$X2016.CiteScore,na.rm=T)),]
-
-dat<-dat[which(dat$X2016.CiteScore <= 40),]
-
-summary(j.dat$X2016.CiteScore,na.rm=T)
-
-
-
-sum.dat<-ddply(dat,.(Access.Type,Year),summarize,
+## summarize all data
+sum.dat<-ddply(dat,.(Article.Open.Access,Year),summarize,
                CiteAve = mean(Cited.by,na.rm=T),
-               Citevar = var(Cited.by,na.rm=T),
+               CiteVar = var(Cited.by,na.rm=T),
                CiteN = length(Cited.by))
 
-tdat<-ddply(dat,.(Year),summarize,
-            NTotal = length(Cited.by))
+## bin for journal rankings
+Jour.Var<-"X2016.CiteScore"  ## Choose metric: "X2016.CiteScore" or "X2016.SJR" or "X2016.SNIP"
+Jour.Var<-"X2016.SJR"
+Jour.Var<-"X2016.SNIP"
 
-sum.dat<-merge(sum.dat,tdat,by.x="Year",by.y="Year",all.x=T)
-sum.dat$PropOA<-sum.dat$CiteN/sum.dat$NTotal*100
+bins<-quantile(jour.dat[,Jour.Var],na.rm=T)  ##quantile bins
+bins<-c(0.574,1,2,5,20)
+
+dat$jour.bin<-cut(dat[,Jour.Var],breaks = bins,labels = LETTERS[1:(length(bins)-1)])
+dat$jour.bin[which(is.na(dat$jour.bin))]<-"A"
+
+sum.dat2<-ddply(dat,.(Article.Open.Access,Year,jour.bin),summarize,
+                CiteAve = mean(Cited.by,na.rm=T),
+                CiteVar = var(Cited.by,na.rm=T),
+                CiteN = length(Cited.by))
+
+## Plots by journal ranking bins
+p1<-ggplot(dat)
+quartz(width=8,height = 5)
+p1 + theme_classic() + 
+  ggtitle(Jour.Var) +
+  geom_boxplot(aes(x=as.factor(Year),y=log(Cited.by+1),colour=Article.Open.Access),
+               outlier.shape=NA) +
+  facet_wrap(~jour.bin,nrow = 2,ncol = 2, scales="free")
 
 
 
 
 
+## bin for article citation numbers
+bins<-quantile(dat$Cited.by,na.rm=T)  ##quantile bins
+#bins<-c(0.000,10,50,100,2573)
 
-str(dat)
 
-fit1<-lm(Cited.by~as.factor(Year)*Access.Type,data=dat)
-summary(fit1)
+dat$cite.bin<-cut(dat$Cited.by,breaks = bins,labels = LETTERS[1:(length(bins)-1)])
+dat$cite.bin[which(is.na(dat$cite.bin))]<-"A"
+
+sum.dat2<-ddply(dat,.(Article.Open.Access,Year,jour.bin),summarize,
+                CiteAve = mean(Cited.by,na.rm=T),
+                CiteVar = var(Cited.by,na.rm=T),
+                CiteN = length(Cited.by))
+
+## Plots
+p1<-ggplot(dat)
+quartz(width=8,height = 5)
+p1 + theme_classic() + 
+  geom_boxplot(aes(x=as.factor(Year),y=log(Cited.by+1),colour=Article.Open.Access),
+               outlier.shape=NA) +
+  facet_wrap(~cite.bin,nrow = 2,ncol = 2, scales="free")
+
+
+
+
+## RUN MODEL ##
+
+fit1<-lmer(Cited.by ~ Article.Open.Access*jour.bin + (1|Year), data=dat)
 anova(fit1)
-
-fit1<-lm(Cited.by~Year*Access.Type,data=dat)
 summary(fit1)
-anova(fit1)
 
-
-fit2<-lm(Cited.by~Access.Type,data=dat)
-summary(fit2)
+fit2<-lmer(Cited.by ~ Article.Open.Access*X2016.SJR + (1|Year), data=dat)
 anova(fit2)
+summary(fit2)
 
-fit3<-lm(Cited.by~as.factor(Year)+Access.Type,data=dat)
-summary(fit3)
-anova(fit3)
+plot(fit2)
+visreg(fit2)
+
+
+# find journal ranking where lines interesct
+j.int<-summary(fit2)$coefficients[2,1]/-summary(fit2)$coefficients[4,1]
+
+## number and percent of papers here that are in journals where citation rates are higher for OA
+nrow(dat[which(dat$X2016.SJR<j.int),])
+nrow(dat[which(dat$X2016.SJR<j.int),])/nrow(dat)
+
+
+## plot all data with slope lines
+
+p2<-ggplot(dat)
+p2 + geom_smooth(aes(x=Year,y=log(Cited.by+1),col=Article.Open.Access))
+
+p2 + geom_smooth(aes(x=X2016.SJR,y=log(Cited.by+1),col=Article.Open.Access))
+
+
+
+# End data analysis for all data
+#
+####################################
 
 
 

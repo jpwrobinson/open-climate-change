@@ -91,27 +91,6 @@ j.dat<-read.csv("./Data/RawData/Scopus_JournalList_20180226.csv",stringsAsFactor
 
 scop<-read.csv('Data/ScopusOAData_20180214TT.csv')
 
-## creating cleaner version for analysis. Use big csv for paper referencing if necessary
-scop$X...Authors <- NULL
-scop$Title <- NULL
-scop$Volume <- NULL
-scop$Issue <- NULL
-scop$Art..No. <- NULL
-scop$Page.start <- NULL
-scop$Page.end <- NULL
-scop$Page.count <- NULL
-scop$Link <- NULL
-scop$Source <- NULL
-scop$EID <- NULL
-scop$Publisher.s.Country <- NULL
-
-## add OA identifier
-scop$OA<-ifelse(is.na(scop$Journal.Open.Access), FALSE, TRUE)
-
-## remove inactive journals
-scop$active<-j.dat$Active.or.Inactive[match(scop$Source.title, j.dat$Source.Title)]
-scop<-scop[which(scop$active=='Active'),]
-
 t<-aggregate(Authors ~ Source.title, scop, length)
 
 ## fair to just take the journals with highest number of papers?
@@ -131,24 +110,6 @@ write.csv(journal.list, file='Data/climate_journals.csv')
 
 ## Reading in scopus data, cleaning, merging, saving to one dataframe
 scop<-read.csv('Data/ScopusOAData_20180214TT.csv')
-
-## creating cleaner version for analysis. Use big csv for paper referencing if necessary
-scop$X...Authors <- NULL
-scop$Title <- NULL
-scop$Volume <- NULL
-scop$Issue <- NULL
-scop$Art..No. <- NULL
-scop$Page.start <- NULL
-scop$Page.end <- NULL
-scop$Page.count <- NULL
-scop$Link <- NULL
-scop$Source <- NULL
-scop$EID <- NULL
-scop$Publisher.s.Country <- NULL
-
-## add OA identifier
-scop$OA<-ifelse(is.na(scop$Journal.Open.Access), FALSE, TRUE)
-
 
 ### Need to subset to relevant climate + ecology journals
 
