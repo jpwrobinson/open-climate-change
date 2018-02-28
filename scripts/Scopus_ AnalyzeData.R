@@ -24,10 +24,7 @@ setwd('/Users/robins64/Documents/git_repos/open-climate-change')
 
 ## load data
 load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - journals with > 300 papers in last 10 years
-dat<-read.csv("./Data/ScopusOAData_20180214TT.csv",stringsAsFactors = F)  ## cleaned data
-
 head(scop)
-head(dat)
 
 dat<-scop
 dat$Cited.by[which(is.na(dat$Cited.by))]<-0
@@ -41,23 +38,23 @@ jour.dat<-jour.dat[-which(duplicated(jour.dat)),]
 # Analyze all data
 
 ## summarize all data
-sum.dat<-ddply(dat,.(Article.Open.Access,Year),summarize,
+sum.dat<-ddply(dat,.(Open.Access,Year),summarize,
                CiteAve = mean(Cited.by,na.rm=T),
                CiteVar = var(Cited.by,na.rm=T),
                CiteN = length(Cited.by))
 
 ## bin for journal rankings
-Jour.Var<-"X2016.CiteScore"  ## Choose metric: "X2016.CiteScore" or "X2016.SJR" or "X2016.SNIP"
-Jour.Var<-"X2016.SJR"
-Jour.Var<-"X2016.SNIP"
+#Jour.Var<-"X2016.CiteScore"  ## Choose metric: "X2016.CiteScore" or "X2016.SJR" or "X2016.SNIP"
+Jour.Var<-"X2016.SJR"     ## Use this
+#Jour.Var<-"X2016.SNIP"
 
 bins<-quantile(jour.dat[,Jour.Var],na.rm=T)  ##quantile bins
-bins<-c(0.574,1,2,5,20)
+bins<-c(0,1,2,5,20)
 
 dat$jour.bin<-cut(dat[,Jour.Var],breaks = bins,labels = LETTERS[1:(length(bins)-1)])
 dat$jour.bin[which(is.na(dat$jour.bin))]<-"A"
 
-sum.dat2<-ddply(dat,.(Article.Open.Access,Year,jour.bin),summarize,
+sum.dat2<-ddply(dat,.(Open.Access,Year,jour.bin),summarize,
                 CiteAve = mean(Cited.by,na.rm=T),
                 CiteVar = var(Cited.by,na.rm=T),
                 CiteN = length(Cited.by))
@@ -67,7 +64,7 @@ p1<-ggplot(dat)
 quartz(width=8,height = 5)
 p1 + theme_classic() + 
   ggtitle(Jour.Var) +
-  geom_boxplot(aes(x=as.factor(Year),y=log(Cited.by+1),colour=Article.Open.Access),
+  geom_boxplot(aes(x=as.factor(Year),y=log(Cited.by+1),colour=Open.Access),
                outlier.shape=NA) +
   facet_wrap(~jour.bin,nrow = 2,ncol = 2, scales="free")
 
@@ -77,13 +74,22 @@ p1 + theme_classic() +
 
 ## bin for article citation numbers
 bins<-quantile(dat$Cited.by,na.rm=T)  ##quantile bins
-#bins<-c(0.000,10,50,100,2573)
-
+bins<-c(0.000,0.99,100,1000,3000)
 
 dat$cite.bin<-cut(dat$Cited.by,breaks = bins,labels = LETTERS[1:(length(bins)-1)])
 dat$cite.bin[which(is.na(dat$cite.bin))]<-"A"
 
-sum.dat2<-ddply(dat,.(Article.Open.Access,Year,jour.bin),summarize,
+
+bins1<-quantile(dat$Cited.by[which(dat$Open.Access=="Open access")],na.rm=T)  ##quantile bins
+bins2<-quantile(dat$Cited.by[which(dat$Open.Access=="Closed")],na.rm=T)  ##quantile bins
+
+dat$cite.bin<-cut(dat$Cited.by,breaks = bins,labels = LETTERS[1:(length(bins)-1)])
+dat$cite.bin[which(is.na(dat$cite.bin))]<-"A"
+
+
+
+
+sum.dat2<-ddply(dat,.(Open.Access,Year,cite.bin),summarize,
                 CiteAve = mean(Cited.by,na.rm=T),
                 CiteVar = var(Cited.by,na.rm=T),
                 CiteN = length(Cited.by))
@@ -92,7 +98,7 @@ sum.dat2<-ddply(dat,.(Article.Open.Access,Year,jour.bin),summarize,
 p1<-ggplot(dat)
 quartz(width=8,height = 5)
 p1 + theme_classic() + 
-  geom_boxplot(aes(x=as.factor(Year),y=log(Cited.by+1),colour=Article.Open.Access),
+  geom_boxplot(aes(x=as.factor(Year),y=log(Cited.by+1),colour=Open.Access),
                outlier.shape=NA) +
   facet_wrap(~cite.bin,nrow = 2,ncol = 2, scales="free")
 
@@ -101,16 +107,19 @@ p1 + theme_classic() +
 
 ## RUN MODEL ##
 
-fit1<-lmer(Cited.by ~ Article.Open.Access*jour.bin + (1|Year), data=dat)
-anova(fit1)
-summary(fit1)
+fit1a<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year), data=dat)
+anova(fit1a)
+summary(fit1a)
 
-fit2<-lmer(Cited.by ~ Article.Open.Access*X2016.SJR + (1|Year), data=dat)
+fit1b<-lmer(Cited.by ~ 0 + Open.Access*jour.bin + (1|Year), data=dat)
+anova(fit1b)
+summary(fit1b)
+
+
+fit2<-lmer(Cited.by ~ Open.Access*X2016.SJR + (1|Year), data=dat)
 anova(fit2)
 summary(fit2)
 
-plot(fit2)
-visreg(fit2)
 
 
 # find journal ranking where lines interesct
@@ -124,9 +133,9 @@ nrow(dat[which(dat$X2016.SJR<j.int),])/nrow(dat)
 ## plot all data with slope lines
 
 p2<-ggplot(dat)
-p2 + geom_smooth(aes(x=Year,y=log(Cited.by+1),col=Article.Open.Access))
+p2 + geom_smooth(aes(x=Year,y=log(Cited.by+1),col=Open.Access))
 
-p2 + geom_smooth(aes(x=X2016.SJR,y=log(Cited.by+1),col=Article.Open.Access))
+p2 + geom_smooth(aes(x=X2016.SJR,y=log(Cited.by+1),col=Open.Access))
 
 
 

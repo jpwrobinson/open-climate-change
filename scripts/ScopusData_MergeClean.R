@@ -32,8 +32,10 @@ for(i in 1:length(file.list)){
 }
 
 str(out.dat)
-out.dat2<-out.dat[-which(duplicated(out.dat)),]
-out.dat3<-out.dat2[-which(is.na(out.dat2$Source.title)),]
+if(length(which(duplicated(out.dat)))>0){   ## remove duplicated rows
+  out.dat2<-out.dat[-which(duplicated(out.dat)),]
+} else {out.dat2<-out.dat}
+out.dat3<-out.dat2[-which(is.na(out.dat2$Source.title)),]  ## remove rows that don't have journal title 
 
 tdat<-j.dat[,c("Source.Title","X2016.CiteScore","X2016.SJR","X2016.SNIP","Open.Access","Publisher.s.Country")]
 dup<-tdat[-which(duplicated(tdat$Source.Title)),]
@@ -41,14 +43,23 @@ names(dup)[which(names(dup)=="Open.Access")]<-"Journal.Open.Access"
 
 out.dat4<-merge(out.dat3,dup,by.x="Source.title",by.y="Source.Title",all.x=T)
 
-## Data frame to work with
+## Data frame. Create two columns: 1) journal = OA, 2) article = OA
 dat<-out.dat4
 names(dat)
-dat$Access.Type[is.na(dat$Access.Type)]<-dat$Journal.Open.Access[is.na(dat$Access.Type)]
+
 dat$Access.Type[which(dat$Access.Type=="Article")]<-"Closed"
 dat$Access.Type[is.na(dat$Access.Type)]<-"Closed"
-dat$Access.Type[which(dat$Access.Type=="DOAJ/ROAD Open Access")]<-"Open Access"
-names(dat)[which(names(dat)=="Access.Type")]<-"Article.Open.Access"
+names(dat)[which(names(dat)=="Access.Type")]<-"Article.Open.Access"  ## article open access
+
+dat$Journal.Open.Access[is.na(dat$Journal.Open.Access)]<-"Closed"  ## journal open access
+
+## add OA identifier
+dat$OA<-ifelse(dat$Article.Open.Access== "Closed", FALSE, TRUE)  ## T/F identified
+dat$OA[which(dat$Journal.Open.Access=="DOAJ/ROAD Open Access")]<-TRUE
+dat$Open.Access<-ifelse(dat$OA==TRUE, "Open access", "Closed")  ## Factor identifier
+
+write.csv(dat,"./Data/CleanScopusOAData_AllData_20180228TT.csv",row.names = F)
+
 
 ##########
 # creating cleaner version of full data for analysis. Use big csv for paper referencing if necessary
@@ -64,8 +75,7 @@ dat$Source <- NULL
 dat$EID <- NULL
 dat$Publisher.s.Country <- NULL
 
-## add OA identifier
-dat$OA<-ifelse(dat$Article.Open.Access== "Closed", FALSE, TRUE)
+
 
 ## remove inactive journals
 dat$active<-j.dat$Active.or.Inactive[match(dat$Source.title, j.dat$Source.Title)]
