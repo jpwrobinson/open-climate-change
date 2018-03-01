@@ -41,3 +41,4 @@ alt$OA<-scop$OA[match(alt$DOI,scop$DOI)]
 
 
 dim(alt[is.na(alt$OA),])
+## still missing 3000 papers
