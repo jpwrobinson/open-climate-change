@@ -99,8 +99,6 @@ setwd('/Users/robins64/Documents/git_repos/open-climate-change')
 
 j.dat<-read.csv("./Data/RawData/Scopus_JournalList_20180226.csv",stringsAsFactors = F,na.strings=c(NA,""))
 
-scop<-read.csv('Data/ScopusOAData_20180214TT.csv')
-
 t<-aggregate(Authors ~ Source.title, scop, length)
 
 ## fair to just take the journals with highest number of papers?
@@ -129,9 +127,6 @@ scop<-scop[scop$Source.title %in% journals$journal,]
 dim(scop)
 
 save(scop, file='Data/scopus_OA_climate_clean.Rdata')
-
-
-
 
 
 
