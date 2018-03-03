@@ -66,7 +66,64 @@ dev.off()
 
 
 ## Also need to consider impact factor effect. 
+
+pdf(file='figures/exploratory/altmetric/predicted_mentions.pdf', height=7, width=11)
+par(mfrow=c(2,2), mar=c(4,4,1,1))
+
+## Total mentions
+m1<-glmer(Altmetric.Attention.Score ~ SJR * OA + (1 | year) + (1 | Journal), alt, family='poisson')
+summary(m1)
+
+pred.dat<-expand.grid(SJR=seq(1,20, 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
+
+## predict dropping ranefs
+p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
+
+plot(1:20, p[1:20], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Altmetric Attention Score')
+lines(1:20, p[21:40], type='l', col='darkred', lwd=2)
+legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
+
+
+## News mentions
 m1<-glmer(News.mentions ~ SJR * OA + (1 | year) + (1 | Journal), alt, family='poisson')
 summary(m1)
 
+pred.dat<-expand.grid(SJR=seq(1,20, 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
 
+## predict dropping ranefs
+p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
+
+plot(1:20, p[1:20], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='News mentions')
+lines(1:20, p[21:40], type='l', col='darkred', lwd=2)
+#legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
+
+
+## Twitter mentions
+m1<-glmer(Twitter.mentions ~ SJR * OA + (1 | year) + (1 | Journal), alt, family='poisson')
+summary(m1)
+
+pred.dat<-expand.grid(SJR=seq(1,20, 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
+
+## predict dropping ranefs
+p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
+
+plot(1:20, p[1:20], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Twitter mentions', ylim=c(0, 900))
+lines(1:20, p[21:40], type='l', col='darkred', lwd=2)
+#legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
+
+## Blog mentions
+m1<-glmer(Blog.mentions ~ SJR * OA + (1 | year) + (1 | Journal), alt, family='poisson')
+summary(m1)
+
+pred.dat<-expand.grid(SJR=seq(1,20, 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
+
+## predict dropping ranefs
+p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
+
+plot(1:20, p[1:20], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Blog mentions', ylim=c(0,300))
+lines(1:20, p[21:40], type='l', col='darkred', lwd=2)
+#legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
+
+
+
+dev.off()
