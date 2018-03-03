@@ -28,7 +28,7 @@ alt$Peer.review.mentions<-NULL
 alt$Weibo.mentions<-NULL
 alt$LinkedIn.mentions<-NULL
 alt$Pinterest.mentions<-NULL
-alt$Facebook.metions<-NULL
+alt$Facebook.mentions<-NULL
 alt$Wikipedia.mentions<-NULL
 alt$Google..mentions<-NULL
 alt$Reddit.mentions<-NULL
@@ -38,6 +38,10 @@ alt$Video.mentions<-NULL
 alt$Syllabi.mentions<-NULL
 alt$Badge.URL<-NULL
 alt$Number.of.Mendeley.readers<-NULL
+alt$Details.Page.URL<-NULL
+
+## change some column names
+colnames(alt)[colnames(alt)=='Journal.Collection.Title']<-'Journal'
 
 ## scopus entries
 load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - journals with > 300 papers in last 10 years
@@ -45,12 +49,18 @@ load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy -
 ## add OA info to altmetric dataframe
 alt$OA<-scop$OA[match(alt$DOI,scop$DOI)]
 dim(alt[is.na(alt$OA),])
-## still missing 3000 papers
+## missing 3000 papers: these are commentaries ?
+
+## drop missing papers
+alt <- alt[!is.na(alt$OA),]
 
 ## add Year for modelling grouping/temporal plots
 alt$year<-as.numeric(str_split_fixed(as.character(alt$Publication.Date), '-', 3)[,1])
 ## drop 2017 studies
 alt <- alt[!alt$year == 2017,]
+
+## add journal impact factor
+alt$SJR<-scop$X2016.SJR[match(alt$DOI, scop$DOI)]
 
 
 
