@@ -12,7 +12,8 @@ names(alt)
 means<-alt %>% select(Altmetric.Attention.Score, Journal, year, SJR,News.mentions, Blog.mentions, Policy.mentions, Twitter.mentions, OA) %>%
 		filter(!Journal == '') %>%
 		group_by(Journal, OA, year) %>% 
-		summarise(news = mean(News.mentions),
+		summarise(attention = mean(Altmetric.Attention.Score),
+				  news = mean(News.mentions),
 				  blog=mean(Blog.mentions),
 				  policy=mean(Policy.mentions),
 				  twitter=mean(Twitter.mentions),
@@ -66,7 +67,7 @@ dev.off()
 
 
 ## Also need to consider impact factor effect. 
-
+## Modelling raw mentions with year and journal as random effects
 ### ONLY PREDICT OPEN ACCESS EFFECT OVER OA JOURNAL IMPACT FACTOR RANGE
 
 pdf(file='figures/exploratory/altmetric/predicted_mentions.pdf', height=7, width=11)
@@ -80,7 +81,6 @@ pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
-
 plot(1:5, p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Altmetric Attention Score',ylim=c(0,45), xlim=c(0, 19))
 lines(1:18, p[19:36], type='l', col='darkred', lwd=2)
 legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
@@ -94,7 +94,6 @@ pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
-
 plot(1:5, p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='News mentions', xlim=c(0, 19), ylim=c(0,1))
 lines(1:18, p[19:36], type='l', col='darkred', lwd=2)
 #legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
@@ -108,7 +107,6 @@ pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
-
 plot(1:5, p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Twitter mentions', ylim=c(0, 900), xlim=c(0, 19))
 lines(1:18, p[19:36], type='l', col='darkred', lwd=2)
 #legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
@@ -121,7 +119,6 @@ pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
-
 plot(1:5, p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Policy mentions', ylim=c(0,2), xlim=c(0, 19))
 lines(1:18, p[19:36], type='l', col='darkred', lwd=2)
 #legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
@@ -178,4 +175,68 @@ ggplot(ratio, aes(year+0.1, Closed, col=SJRfac)) + geom_point() +
 dev.off()
 
 
+
+# Reduce effect of outliers for better model fits.
+## Modelling mean mentions by journal in each year. 
+### ONLY PREDICT OPEN ACCESS EFFECT OVER OA JOURNAL IMPACT FACTOR RANGE
+
+pdf(file='figures/exploratory/altmetric/predicted_mentions_means.pdf', height=7, width=11)
+par(mfrow=c(2,2), mar=c(4,4,1,1))
+
+## Total mentions
+m1<-lmer(log10(attention+1) ~ SJR * OA + (1 | year) + (1 | Journal), means)
+summary(m1)
+
+pred.dat<-expand.grid(SJR=seq(1,max(means$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
+pred.dat<-pred.dat[!(pred.dat$SJR > 5 & pred.dat$OA=='TRUE'),]
+
+## predict dropping ranefs
+p<-predict(m1, newdata=pred.dat, re.form=NA, type='response')
+plot(1:5, 10^p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Altmetric Attention Score',ylim=c(0,30), xlim=c(0, 19))
+lines(1:18, 10^p[6:23], type='l', col='darkred', lwd=2)
+legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
+
+
+## News mentions
+m1<-lmer(log10(news+1) ~ SJR * OA + (1 | year) + (1 | Journal), means)
+summary(m1)
+
+pred.dat<-expand.grid(SJR=seq(1,max(means$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
+pred.dat<-pred.dat[!(pred.dat$SJR > 5 & pred.dat$OA=='TRUE'),]
+
+## predict dropping ranefs
+p<-predict(m1, newdata=pred.dat, re.form=NA, type='response')
+plot(1:5, 10^p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='News mentions',ylim=c(0,5), xlim=c(0, 19))
+lines(1:18, 10^p[6:23], type='l', col='darkred', lwd=2)
+# legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
+
+
+## Twitter mentions
+m1<-lmer(log10(twitter+1) ~ SJR * OA + (1 | year) + (1 | Journal), means)
+summary(m1)
+
+pred.dat<-expand.grid(SJR=seq(1,max(means$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
+pred.dat<-pred.dat[!(pred.dat$SJR > 5 & pred.dat$OA=='TRUE'),]
+
+## predict dropping ranefs
+p<-predict(m1, newdata=pred.dat, re.form=NA, type='response')
+plot(1:5, 10^p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Twitter mentions',ylim=c(0,80), xlim=c(0, 19))
+lines(1:18, 10^p[6:23], type='l', col='darkred', lwd=2)
+# legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
+
+## Policy mentions
+m1<-lmer(log10(policy+1) ~ SJR * OA + (1 | year) + (1 | Journal), means)
+summary(m1)
+
+pred.dat<-expand.grid(SJR=seq(1,max(means$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
+pred.dat<-pred.dat[!(pred.dat$SJR > 5 & pred.dat$OA=='TRUE'),]
+
+## predict dropping ranefs
+p<-predict(m1, newdata=pred.dat, re.form=NA, type='response')
+plot(1:5, 10^p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Policy mentions',ylim=c(0,2), xlim=c(0, 19))
+lines(1:18, 10^p[6:23], type='l', col='darkred', lwd=2)
+# legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
+
+
+dev.off()
 
