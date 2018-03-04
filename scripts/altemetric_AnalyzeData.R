@@ -81,7 +81,7 @@ pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
-plot(1:5, p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Altmetric Attention Score',ylim=c(0,45), xlim=c(0, 19))
+plot(1:6, p[1:6], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Altmetric Attention Score',ylim=c(0,100), xlim=c(0, 19))
 lines(1:18, p[19:36], type='l', col='darkred', lwd=2)
 legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
 
@@ -94,7 +94,7 @@ pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
-plot(1:5, p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='News mentions', xlim=c(0, 19), ylim=c(0,1))
+plot(1:6, p[1:6], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='News mentions', xlim=c(0, 19), ylim=c(0,1))
 lines(1:18, p[19:36], type='l', col='darkred', lwd=2)
 #legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
 
@@ -107,7 +107,7 @@ pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
-plot(1:5, p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Twitter mentions', ylim=c(0, 900), xlim=c(0, 19))
+plot(1:6, p[1:6], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Twitter mentions', ylim=c(0, 100), xlim=c(0, 19))
 lines(1:18, p[19:36], type='l', col='darkred', lwd=2)
 #legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
 
@@ -119,7 +119,7 @@ pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response', se=TRUE)
-plot(1:5, p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Policy mentions', ylim=c(0,2), xlim=c(0, 19))
+plot(1:6, p[1:6], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Policy mentions', ylim=c(0,2), xlim=c(0, 19))
 lines(1:18, p[19:36], type='l', col='darkred', lwd=2)
 #legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
 
@@ -147,19 +147,20 @@ ratio$Open[is.na(ratio$Open)]<-0
 ratio$ratio<-with(ratio, Open/Closed)
 
 ## There are no open journals in the top impact bin
-unique(alt$Journal[alt$SJRfac=='A']) ## n = 24
-aggregate(Journal ~ OA, alt[alt$SJRfac=='A',], function(x)length(unique(x))) ## 15 open, 21 closed
+unique(alt$Journal[alt$SJRfac=='A']) ## n = 48
+aggregate(Journal ~ OA, alt[alt$SJRfac=='A',], function(x)length(unique(x))) ## 23 open, 40 closed
 
-unique(alt$Journal[alt$SJRfac=='B']) ## n = 3
-aggregate(Journal ~ OA, alt[alt$SJRfac=='B',], function(x)length(unique(x))) ## 3 open, 3 closed
+unique(alt$Journal[alt$SJRfac=='B']) ## n = 14
+aggregate(Journal ~ OA, alt[alt$SJRfac=='B',], function(x)length(unique(x))) ## 10 open, 13 closed
 
-unique(alt$Journal[alt$SJRfac=='C']) ## n = 19
-aggregate(Journal ~ OA, alt[alt$SJRfac=='C',], function(x)length(unique(x))) ## 14 open, 14 closed
+unique(alt$Journal[alt$SJRfac=='C']) ## n = 27
+aggregate(Journal ~ OA, alt[alt$SJRfac=='C',], function(x)length(unique(x))) ## 18 open, 22 closed
 
-unique(alt$Journal[alt$SJRfac=='D']) ## n = 6, all closed
+unique(alt$Journal[alt$SJRfac=='D']) ## n = 15
+aggregate(Journal ~ OA, alt[alt$SJRfac=='D',], function(x)length(unique(x))) ## 3 open, 13 closed
 
 # drop top journals
-ratio <- ratio[!ratio$SJRfac=='D',]
+# ratio <- ratio[!ratio$SJRfac=='D',]
 
 pdf(file='figures/exploratory/altmetric/mean_mentions_impactbins.pdf', height=7, width=11)
 
@@ -188,12 +189,12 @@ m1<-lmer(log10(attention+1) ~ SJR * OA + (1 | year) + (1 | Journal), means)
 summary(m1)
 
 pred.dat<-expand.grid(SJR=seq(1,max(means$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
-pred.dat<-pred.dat[!(pred.dat$SJR > 5 & pred.dat$OA=='TRUE'),]
+pred.dat<-pred.dat[!(pred.dat$SJR > 6 & pred.dat$OA=='TRUE'),]
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response')
-plot(1:5, 10^p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Altmetric Attention Score',ylim=c(0,30), xlim=c(0, 19))
-lines(1:18, 10^p[6:23], type='l', col='darkred', lwd=2)
+plot(1:6, 10^p[1:6], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Altmetric Attention Score',ylim=c(0,170), xlim=c(0, 19))
+lines(1:18, 10^p[7:24], type='l', col='darkred', lwd=2)
 legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
 
 
@@ -202,12 +203,12 @@ m1<-lmer(log10(news+1) ~ SJR * OA + (1 | year) + (1 | Journal), means)
 summary(m1)
 
 pred.dat<-expand.grid(SJR=seq(1,max(means$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
-pred.dat<-pred.dat[!(pred.dat$SJR > 5 & pred.dat$OA=='TRUE'),]
+pred.dat<-pred.dat[!(pred.dat$SJR > 6 & pred.dat$OA=='TRUE'),]
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response')
-plot(1:5, 10^p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='News mentions',ylim=c(0,5), xlim=c(0, 19))
-lines(1:18, 10^p[6:23], type='l', col='darkred', lwd=2)
+plot(1:6, 10^p[1:6], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='News mentions',ylim=c(0,10), xlim=c(0, 19))
+lines(1:18, 10^p[7:24], type='l', col='darkred', lwd=2)
 # legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
 
 
@@ -216,12 +217,12 @@ m1<-lmer(log10(twitter+1) ~ SJR * OA + (1 | year) + (1 | Journal), means)
 summary(m1)
 
 pred.dat<-expand.grid(SJR=seq(1,max(means$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
-pred.dat<-pred.dat[!(pred.dat$SJR > 5 & pred.dat$OA=='TRUE'),]
+pred.dat<-pred.dat[!(pred.dat$SJR > 6 & pred.dat$OA=='TRUE'),]
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response')
-plot(1:5, 10^p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Twitter mentions',ylim=c(0,80), xlim=c(0, 19))
-lines(1:18, 10^p[6:23], type='l', col='darkred', lwd=2)
+plot(1:6, 10^p[1:6], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Twitter mentions',ylim=c(0,40), xlim=c(0, 19))
+lines(1:18, 10^p[7:24], type='l', col='darkred', lwd=2)
 # legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
 
 ## Policy mentions
@@ -229,12 +230,12 @@ m1<-lmer(log10(policy+1) ~ SJR * OA + (1 | year) + (1 | Journal), means)
 summary(m1)
 
 pred.dat<-expand.grid(SJR=seq(1,max(means$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
-pred.dat<-pred.dat[!(pred.dat$SJR > 5 & pred.dat$OA=='TRUE'),]
+pred.dat<-pred.dat[!(pred.dat$SJR > 6 & pred.dat$OA=='TRUE'),]
 
 ## predict dropping ranefs
 p<-predict(m1, newdata=pred.dat, re.form=NA, type='response')
-plot(1:5, 10^p[1:5], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Policy mentions',ylim=c(0,2), xlim=c(0, 19))
-lines(1:18, 10^p[6:23], type='l', col='darkred', lwd=2)
+plot(1:6, 10^p[1:6], type='l', col='darkblue', lwd=2, xlab='Impact factor', ylab='Policy mentions',ylim=c(0,1.5), xlim=c(0, 19))
+lines(1:18, 10^p[7:24], type='l', col='darkred', lwd=2)
 # legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'), bty='n')
 
 
