@@ -125,68 +125,9 @@ scop<-read.csv('Data/ScopusOAData_20180214TT.csv')
 journals<-read.csv(file='Data/climate_journals.csv')
 
 scop<-scop[scop$Source.title %in% journals$journal,]
-dim(scop)
+dim(scop) ## 57610 rows
 
 save(scop, file='Data/scopus_OA_climate_clean.Rdata')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

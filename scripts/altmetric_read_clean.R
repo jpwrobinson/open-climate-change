@@ -10,7 +10,9 @@ setwd('/Users/robins64/Documents/git_repos/open-climate-change')
 
 library(here); library(stringr)
 
-alt<-read.csv('Data/altmetric/Altmetric_2018-02-26.csv')
+# alt<-read.csv('Data/altmetric/Altmetric_2018-02-26.csv')
+alt<-read.csv('Data/altmetric/Altmetric_2018-03-04.csv')
+
 ## drop columns we probably won't use
 alt$Authors.at.my.Institution<-NULL
 alt$Departments<-NULL
@@ -44,20 +46,18 @@ alt$Details.Page.URL<-NULL
 colnames(alt)[colnames(alt)=='Journal.Collection.Title']<-'Journal'
 
 ## scopus entries
-load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - journals with > 300 papers in last 10 years
+load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - journals with > 200 papers in last 10 years
 
 ## add OA info to altmetric dataframe
 alt$OA<-scop$OA[match(alt$DOI,scop$DOI)]
 dim(alt[is.na(alt$OA),])
-## missing 3000 papers: these are commentaries ?
+## missing 3728 papers: these are commentaries ?
 
 ## drop missing papers
 alt <- alt[!is.na(alt$OA),]
 
 ## add Year for modelling grouping/temporal plots
 alt$year<-as.numeric(str_split_fixed(as.character(alt$Publication.Date), '-', 3)[,1])
-## drop 2017 studies
-alt <- alt[!alt$year == 2017,]
 
 ## add journal impact factor
 alt$SJR<-scop$X2016.SJR[match(alt$DOI, scop$DOI)]
