@@ -23,7 +23,7 @@ setwd("~/GitHub/open-climate-change/")
 setwd('/Users/robins64/Documents/git_repos/open-climate-change')
 
 ## load data
-load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - journals with > 300 papers in last 10 years
+load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - journals with > 200 papers in last 10 years
 full.scop<-read.csv("./Data/ScopusOAData_20180214TT.csv",stringsAsFactors = F)
 
 head(scop)
@@ -41,12 +41,17 @@ jour.dat<-dat[,c("Source.title","X2016.CiteScore","X2016.SJR","X2016.SNIP","Jour
 jour.dat<-jour.dat[-which(duplicated(jour.dat)),]
 
 
-## plot data
+## plot raw data
 p1<-ggplot(dat)
-p1 + geom_boxplot(aes(x=as.factor(Year), y=log(Cited.by+1), colour=Open.Access))
-p1 + geom_boxplot(aes(x=as.factor(Year), y=log(Cited.by+1), colour=Open.Access),
-                  outlier.shape=NA)
+p1F<-p1 + geom_boxplot(aes(x=as.factor(Year), y=log(Cited.by+1), colour=Open.Access)) + 
+  xlab("Year") + ylab("# citations (log +1)")
+p1F<-p1 + geom_boxplot(aes(x=as.factor(Year), y=log(Cited.by+1), colour=Open.Access),
+                  outlier.shape=NA) + 
+  xlab("Year") + ylab("# citations (log +1)")
 
+#pdf("./figures/exploratory/scopus/cite_byyear_boxplot_nooutliers.pdf")
+p1F
+dev.off()
 
 
 ####################################
@@ -81,13 +86,19 @@ sum.dat2a$PropN<-sum.dat2a$N/sum(sum.dat2a$N)
 
 ## Plots by journal ranking bins
 p1<-ggplot(dat)
-quartz(width=8,height = 5)
-p1 + theme_classic() + 
-  ggtitle(Jour.Var) +
+#quartz(width=8,height = 5)
+p1F<-p1 + theme_classic() + 
+  ggtitle(Jour.Var) + 
+  xlab("Year") + 
+  ylab("# citations (log + 1)") +
   geom_boxplot(aes(x=as.factor(Year),y=log(Cited.by+1),colour=Open.Access),
                outlier.shape=NA) +
-  facet_wrap(~jour.bin,nrow = 2,ncol = 2, scales="free")
+  facet_wrap(~jour.bin,nrow = 2,ncol = 2, scales="free") + 
+  
 
+pdf("./figures/exploratory/scopus/citebySJRbins_byyear_nooutliers.pdf",width=8,height=6)
+p1F
+dev.off()
 
 ## FIT MIXED EFFECTS MODEL ##
 
@@ -101,15 +112,15 @@ fit1f<-lmer(Cited.by ~ Open.Access + (1|Source.title), data=dat)
 fit1g<-lmer(Cited.by ~ 1 + (1|Year) + (1|Source.title), data=dat)
 fit1h<-lm(Cited.by ~ Open.Access*jour.bin, data=dat)
 
-fit1i<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year) + (jour.bin|Source.title), data=dat)
-summary(fit1i)
+#fit1i<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year) + (jour.bin|Source.title), data=dat)
+#summary(fit1i)
 
 
 anova(fit1a,fit1b,fit1c,fit1d,fit1e,fit1f,fit1g)
 anova(fit1a,fit1d,fit1e)
 
 
-mod.fit<-fit1i  ## choose model to plot
+mod.fit<-fit1a  ## choose model to plot
 
 summary(mod.fit)
 
@@ -147,7 +158,9 @@ pf1<-pfit1 +
 
 pf1
 
-
+pdf("./figures/exploratory/scopus/citebySJRbins_lmerModelfit1a.pdf")
+pf1
+dev
 
 
 ## fit model to continuous journal ranking
@@ -173,8 +186,12 @@ nrow(dat[which(dat$X2016.SJR<j.int),])/nrow(dat)
 p2<-ggplot(dat)
 p2 + geom_smooth(aes(x=Year,y=log(Cited.by+1),col=Open.Access))
 
-p2 + geom_smooth(aes(x=X2016.SJR,y=log(Cited.by+1),col=Open.Access),method="glm")
+pf2<-p2 + geom_smooth(aes(x=X2016.SJR,y=log(Cited.by+1),col=Open.Access),method="glm") +
+  xlab("SJR ranking 2016") + ylab("# citations (log + 1)")
 
+pdf("./figures/exploratory/scopus/citebySJR_modelfit3.pdf")
+pf2
+dev.off()
 
 
 # End data analysis for all data
