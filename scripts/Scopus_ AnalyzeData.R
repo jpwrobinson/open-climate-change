@@ -15,6 +15,7 @@ library(gridExtra)
 library(plyr)
 library(lme4)
 library(visreg)
+library(reshape)
 
 ## clean data and merge with journal metric data
 
@@ -84,6 +85,10 @@ sum.dat2a<-ddply(sum.dat2,.(jour.bin),summarize,
                  N = sum(CiteN))
 sum.dat2a$PropN<-sum.dat2a$N/sum(sum.dat2a$N)
 
+sum.dat3<-cast(sum.dat2[,1:4],Year+jour.bin ~ Open.Access)
+names(sum.dat3)[4]<-"Open.Access"
+sum.dat3$CiteAveRatio<-with(sum.dat3,Open.Access/Closed)
+
 ## Plots by journal ranking bins
 p1<-ggplot(dat)
 #quartz(width=8,height = 5)
@@ -93,13 +98,40 @@ p1F<-p1 + theme_classic() +
   ylab("# citations (log + 1)") +
   geom_boxplot(aes(x=as.factor(Year),y=log(Cited.by+1),colour=Open.Access),
                outlier.shape=NA) +
-  facet_wrap(~jour.bin,nrow = 2,ncol = 2, scales="free") + 
+  facet_wrap(~jour.bin,nrow = 2,ncol = 2, scales="free") 
   
 
 pdf("./figures/exploratory/scopus/citebySJRbins_byyear_nooutliers.pdf",width=8,height=6)
 p1F
 dev.off()
 
+p1<-ggplot(sum.dat2)
+#quartz(width=8,height = 5)
+p1F<-p1 +
+  ggtitle(Jour.Var) + 
+  xlab("Year") + 
+  ylab("Mean # citations") +
+  geom_point(aes(x=Year,y=CiteAve,colour=jour.bin, shape=Open.Access)) 
+
+
+p2<-ggplot(sum.dat3)
+#quartz(width=8,height = 5)
+p2F<-p2 +
+  ggtitle(Jour.Var) + 
+  xlab("Year") + 
+  ylab("Ratio # citations (OA:Closed)") +
+  geom_point(aes(x=Year,y=CiteAveRatio,colour=jour.bin)) 
+
+
+
+pdf("./figures/exploratory/scopus/meancitebySJRbins_byyear.pdf")
+p1F
+p2F
+
+dev.off()
+
+
+############################
 ## FIT MIXED EFFECTS MODEL ##
 
 fit1a<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year) + (1|Source.title), data=dat)
@@ -111,14 +143,10 @@ fit1e<-lmer(Cited.by ~ Open.Access + (1|Year), data=dat)
 fit1f<-lmer(Cited.by ~ Open.Access + (1|Source.title), data=dat)
 fit1g<-lmer(Cited.by ~ 1 + (1|Year) + (1|Source.title), data=dat)
 fit1h<-lm(Cited.by ~ Open.Access*jour.bin, data=dat)
-
 #fit1i<-lmer(Cited.by ~ Open.Access*jour.bin + (1|Year) + (jour.bin|Source.title), data=dat)
-#summary(fit1i)
-
 
 anova(fit1a,fit1b,fit1c,fit1d,fit1e,fit1f,fit1g)
 anova(fit1a,fit1d,fit1e)
-
 
 mod.fit<-fit1a  ## choose model to plot
 
@@ -192,6 +220,18 @@ pf2<-p2 + geom_smooth(aes(x=X2016.SJR,y=log(Cited.by+1),col=Open.Access),method=
 pdf("./figures/exploratory/scopus/citebySJR_modelfit3.pdf")
 pf2
 dev.off()
+
+##########
+## fit model with year as factor
+dat$Year.Fac<-as.factor(dat$Year)
+
+fit4a<-lmer(Cited.by ~ Open.Access*jour.bin*Year.Fac + (1|Source.title), data=dat)
+
+anova(fit1a,fit4a)
+
+summary(fit4a)$coefficients[,1:2]
+
+
 
 
 # End data analysis for all data
