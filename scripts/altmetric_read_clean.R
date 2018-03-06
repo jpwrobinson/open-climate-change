@@ -62,6 +62,8 @@ alt$year<-as.numeric(str_split_fixed(as.character(alt$Publication.Date), '-', 3)
 ## add journal impact factor
 alt$SJR<-scop$X2016.SJR[match(alt$DOI, scop$DOI)]
 
+## drop 1 FAO paper
+alt<-alt[!alt$Journal=='',]
 
 
 save(alt, file='Data/altmetric_OA_clean.Rdata')
