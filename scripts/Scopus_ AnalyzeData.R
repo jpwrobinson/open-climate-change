@@ -71,8 +71,16 @@ Jour.Var<-"X2016.SJR"     ## Use this
 #Jour.Var<-"X2016.SNIP"
 
 bins<-quantile(jour.dat[,Jour.Var],na.rm=T)  ##quantile bins
-#bins<-c(0,1,2,5,20)
 
+## write out journal list with bins
+jour.dat$bin<-cut(jour.dat[,Jour.Var],breaks = bins,labels = LETTERS[1:(length(bins)-1)])
+jour.dat$bin[which(is.na(jour.dat$bin))]<-"A"
+
+write.csv(jour.dat,"./Data/BinJournallist_fromScopus.csv",row.names=F)
+
+
+
+## article journal bins
 dat$jour.bin<-cut(dat[,Jour.Var],breaks = bins,labels = LETTERS[1:(length(bins)-1)])
 dat$jour.bin[which(is.na(dat$jour.bin))]<-"A"
 
