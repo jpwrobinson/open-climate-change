@@ -118,6 +118,7 @@ p2<-ggplot(sum.dat3)
 #quartz(width=8,height = 5)
 p2F<-p2 +
   ggtitle(Jour.Var) + 
+  geom_hline(yintercept = 1, lty=2, colour="grey25") +
   xlab("Year") + 
   ylab("Ratio # citations (OA:Closed)") +
   geom_point(aes(x=Year,y=CiteAveRatio,colour=jour.bin)) 
@@ -232,11 +233,22 @@ anova(fit1a,fit4a)
 summary(fit4a)$coefficients[,1:2]
 
 
-
-
 # End data analysis for all data
 #
 ####################################
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
