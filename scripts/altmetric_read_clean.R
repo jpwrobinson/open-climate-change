@@ -84,7 +84,6 @@ alt$Journal[alt$Journal=='Estuarine Coastal and Shelf Science']<-'Estuarine, Coa
 
 ## add impact bins
 bins<-read.csv('Data/BinJournallist_fromScopus.csv')
-
 alt$SJRfac<-bins$bin[match(alt$Journal, bins$Source.title)]
 
 

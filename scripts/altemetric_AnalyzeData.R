@@ -131,15 +131,15 @@ dev.off()
 ## Simplify outliers using mean mentions by year and impact bins
 ### estimate mentions ratio for closed:OA
 
-## bin journals by impact factor
-jour.dat<-alt[,c("Journal","SJR")]
-jour.dat<-jour.dat[-which(duplicated(jour.dat)),]
+# ## bin journals by impact factor
+# jour.dat<-alt[,c("Journal","SJR")]
+# jour.dat<-jour.dat[-which(duplicated(jour.dat)),]
 
 
-bins<-quantile(jour.dat$SJR,na.rm=T)  ##quantile bins
-jour.dat$SJRfac<-cut(jour.dat$SJR,breaks = bins,labels = LETTERS[1:(length(bins)-1)])
-jour.dat$SJRfac[which(is.na(jour.dat$SJRfac))]<-"A"
-write.csv(jour.dat, 'Data/altmetric/altmetric_binning.csv')
+# bins<-quantile(jour.dat$SJR,na.rm=T)  ##quantile bins
+# jour.dat$SJRfac<-cut(jour.dat$SJR,breaks = bins,labels = LETTERS[1:(length(bins)-1)])
+# jour.dat$SJRfac[which(is.na(jour.dat$SJRfac))]<-"A"
+# write.csv(jour.dat, 'Data/altmetric/altmetric_binning.csv')
 
 ratio<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
 	group_by(year, SJRfac, OA) %>% 
@@ -152,17 +152,17 @@ ratio$Open[is.na(ratio$Open)]<-0
 ratio$ratio<-with(ratio, Open/Closed)
 
 ## There are no open journals in the top impact bin
-unique(alt$Journal[alt$SJRfac=='A']) ## n = 48
-aggregate(Journal ~ OA, alt[alt$SJRfac=='A',], function(x)length(unique(x))) ## 23 open, 40 closed
+unique(alt$Journal[alt$SJRfac=='A']) ## n = 24
+aggregate(Journal ~ OA, alt[alt$SJRfac=='A',], function(x)length(unique(x))) ## 12 open, 22 closed
 
-unique(alt$Journal[alt$SJRfac=='B']) ## n = 14
-aggregate(Journal ~ OA, alt[alt$SJRfac=='B',], function(x)length(unique(x))) ## 10 open, 13 closed
+unique(alt$Journal[alt$SJRfac=='B']) ## n = 29
+aggregate(Journal ~ OA, alt[alt$SJRfac=='B',], function(x)length(unique(x))) ## 16 open, 24 closed
 
-unique(alt$Journal[alt$SJRfac=='C']) ## n = 27
-aggregate(Journal ~ OA, alt[alt$SJRfac=='C',], function(x)length(unique(x))) ## 18 open, 22 closed
+unique(alt$Journal[alt$SJRfac=='C']) ## n = 21
+aggregate(Journal ~ OA, alt[alt$SJRfac=='C',], function(x)length(unique(x))) ## 14 open, 17 closed
 
-unique(alt$Journal[alt$SJRfac=='D']) ## n = 15
-aggregate(Journal ~ OA, alt[alt$SJRfac=='D',], function(x)length(unique(x))) ## 3 open, 13 closed
+unique(alt$Journal[alt$SJRfac=='D']) ## n = 23
+aggregate(Journal ~ OA, alt[alt$SJRfac=='D',], function(x)length(unique(x))) ## 10 open, 20 closed
 
 # drop top journals
 # ratio <- ratio[!ratio$SJRfac=='D',]
