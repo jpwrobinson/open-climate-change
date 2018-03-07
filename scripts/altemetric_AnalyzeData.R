@@ -132,14 +132,14 @@ dev.off()
 ### estimate mentions ratio for closed:OA
 
 ## bin journals by impact factor
-jour.dat<-alt[,c("Journal","SJR", 'OA')]
+jour.dat<-alt[,c("Journal","SJR")]
 jour.dat<-jour.dat[-which(duplicated(jour.dat)),]
 
 
 bins<-quantile(jour.dat$SJR,na.rm=T)  ##quantile bins
 jour.dat$SJRfac<-cut(jour.dat$SJR,breaks = bins,labels = LETTERS[1:(length(bins)-1)])
 jour.dat$SJRfac[which(is.na(jour.dat$SJRfac))]<-"A"
-write.csv(jour.dat, 'Data/altmetric_binning.csv')
+write.csv(jour.dat, 'Data/altmetric/altmetric_binning.csv')
 
 ratio<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
 	group_by(year, SJRfac, OA) %>% 

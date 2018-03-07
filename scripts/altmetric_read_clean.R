@@ -64,6 +64,28 @@ alt$SJR<-scop$X2016.SJR[match(alt$DOI, scop$DOI)]
 
 ## drop 1 FAO paper
 alt<-alt[!alt$Journal=='',]
+## drop economic paper
+alt<-alt[!alt$Journal=='Latin American Economic Review',]
+
+## fix journal names
+alt$Journal<-str_replace_all(alt$Journal, '&', 'and')
+alt$Journal[alt$Journal=='Proceedings of the National Academy of Sciences']<-'Proceedings of the National Academy of Sciences of the United States of America'
+alt$Journal[alt$Journal=='Environmental Research Letters (ERL)']<-'Environmental Research Letters'
+alt$Journal[alt$Journal=='Global Environmental Change Part A: Human and Policy Dimensions']<-'Global Environmental Change'
+alt$Journal[alt$Journal=='Water (20734441)']<-'Water (Switzerland)'
+alt$Journal[alt$Journal=='Atmospheric Environment (00046981)']<-'Atmospheric Environment'
+alt$Journal[alt$Journal=='AMBIO - A Journal of the Human Environment']<-'Ambio'
+alt$Journal[alt$Journal=='Deep-Sea Research Part II, Topical Studies in Oceanography']<-'Deep-Sea Research Part II: Topical Studies in Oceanography'
+alt$Journal[alt$Journal=='CATENA']<-'Catena'
+alt$Journal[alt$Journal=='PloS one']<-'PLoS ONE'
+alt$Journal[alt$Journal=='Science of The Total Environment']<-'Science of the Total Environment'
+alt$Journal[alt$Journal=='AMBIO']<-'Ambio'
+alt$Journal[alt$Journal=='Estuarine Coastal and Shelf Science']<-'Estuarine, Coastal and Shelf Science'
+
+## add impact bins
+bins<-read.csv('Data/BinJournallist_fromScopus.csv')
+
+alt$SJRfac<-bins$bin[match(alt$Journal, bins$Source.title)]
 
 
 save(alt, file='Data/altmetric_OA_clean.Rdata')
