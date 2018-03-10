@@ -31,7 +31,10 @@ unique(alt$Journal[alt$SJRfac=='D']) ## n = 23
 aggregate(Journal ~ OA, alt[alt$SJRfac=='D',], function(x)length(unique(x))) ## 10 open, 20 closed
 
 
+t<-alt[alt$Policy.mentions>0,]
+ggplot(t, aes(year, Policy.mentions, col=OA))+ geom_point()
 
+dim(t[t$OA=='TRUE',]) ## 112 OA policy mentions
 
 ## get mean mentions by OA + bin
 ratio<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
