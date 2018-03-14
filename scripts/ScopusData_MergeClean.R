@@ -49,6 +49,7 @@ names(dat)
 
 dat$Access.Type[which(dat$Access.Type=="Article")]<-"Closed"
 dat$Access.Type[is.na(dat$Access.Type)]<-"Closed"
+dat$Access.Type[which(dat$Journal.Open.Access=="DOAJ/ROAD Open Access")]<-"Open"
 names(dat)[which(names(dat)=="Access.Type")]<-"Article.Open.Access"  ## article open access
 
 dat$Journal.Open.Access[is.na(dat$Journal.Open.Access)]<-"Closed"  ## journal open access
@@ -56,10 +57,9 @@ dat$Journal.Open.Access[is.na(dat$Journal.Open.Access)]<-"Closed"  ## journal op
 ## add OA identifier
 dat$OA<-ifelse(dat$Article.Open.Access== "Closed", FALSE, TRUE)  ## T/F identified
 dat$OA[which(dat$Journal.Open.Access=="DOAJ/ROAD Open Access")]<-TRUE
-dat$Open.Access<-ifelse(dat$OA==TRUE, "Open access", "Closed")  ## Factor identifier
+dat$Open.Access<-ifelse(dat$OA==TRUE, "Open", "Closed")  ## Factor identifier
 
 write.csv(dat,"./Data/CleanScopusOAData_AllData_20180228TT.csv",row.names = F)
-
 
 ##########
 # creating cleaner version of full data for analysis. Use big csv for paper referencing if necessary

@@ -162,7 +162,7 @@ mod.fit<-fit1a  ## choose model to plot
 summary(mod.fit)
 
 coef1<-summary(mod.fit)$coefficients
-out.fit1<-data.frame(Open.Access = rep(c("Closed","Open access"),each=4),
+out.fit1<-data.frame(Open.Access = rep(c("Closed","Open"),each=4),
                      jour.bin = rep(c(LETTERS[1:4]),times=2))
 out.fit1$estimate<-c(coef1[1,1], 
                      coef1[1,1] + coef1[3,1], 
@@ -197,7 +197,7 @@ pf1
 
 pdf("./figures/exploratory/scopus/citebySJRbins_lmerModelfit1a.pdf")
 pf1
-dev
+dev.off()
 
 
 ## fit model to continuous journal ranking
