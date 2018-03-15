@@ -30,7 +30,6 @@ dat<-merge(dat,j.dat[,c("Source.title","bin")],by.x="Source.title",by.y="Source.
 names(dat)
 
 
-
 ################## TABLE DATA ###################
 
 ## summary of journal bins using JOURNAL open access data
@@ -73,7 +72,7 @@ ddply(dat,.(Year),summarize,
 
 #################### FIGURE DATA #####################
 
-se<-function(x) sd(x)/sqrt(length(x))
+se<-function(x) sd(x,na.rm=T)/sqrt(length(x))
 
 ## summary of open access over time
 names(dat)
@@ -111,6 +110,18 @@ p1f<-p1 + theme_classic() +
 pdf("./figures/scopusfig_meanbins_1.pdf",width=3.5,height=2.5)
 p1f
 dev.off()
+
+
+## weighted by years
+mean.dat<-ddply(dat,.(Year,bin,OA),summarize,
+                MeanCite = mean(Cited.by,na.rm=T),
+                SECite = se(Cited.by))
+mean.dat<-ddply(mean.dat,.(bin,OA),summarize,
+                MeanCite = mean(MeanCite,na.rm=T),
+                SECite = se(SECite))
+
+
+
 
 
 
@@ -176,7 +187,7 @@ dev.off()
 
 
 ## Plot Model fit 
-fit1a<-lmer(Cited.by ~ Open.Access*bin + (1|Year) + (1|Source.title),)
+fit1a<-lmer(Cited.by ~ Open.Access*bin + (1|Year) + (1|Source.title),data=dat)
 mod.fit<-fit1a  ## choose model to plot
 
 summary(mod.fit)
@@ -230,7 +241,6 @@ quartz(width=3.5,height=2)
 pdf("./figures/scopusfig_model_1.pdf",width=3.5,height=2.5)
 pf1
 dev.off()
-
 
 
 
