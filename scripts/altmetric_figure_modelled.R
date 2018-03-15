@@ -38,48 +38,75 @@ dim(t[t$OA=='TRUE',]) ## 112 OA policy mentions
 
 ## get mean mentions by OA + bin
 ratio<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
-	group_by(SJRfac, OA) %>% 
-	summarise(news = mean(News.mentions), policy=mean(Policy.mentions), twitter=mean(Twitter.mentions)) %>%
-	gather(source, mentions, -SJRfac, -OA) %>% 
-	spread(OA, mentions) 
+	group_by(SJRfac, OA, Journal, year) %>% 
+	summarise(news = mean(News.mentions), 
+				policy=mean(Policy.mentions), 
+				twitter=mean(Twitter.mentions)) %>%
+	gather(source, mentions, -SJRfac, -OA, -Journal, -year) 
+
 
 ## add zeroes for cases with no mentions in a given year * journal quantile
-ratio$Open[is.na(ratio$Open)]<-0
-ratio$ratio<-with(ratio, Open/Closed)
+ratio$mentions[is.na(ratio$mentions)]<-0
+
 
 # ggplot(ratio, aes(SJRfac, Closed, col=source))+geom_point() + facet_wrap (~source, scales='free') + 
 # 		geom_point(aes(SJRfac, Open, col=source), shape=2)
 
 
 ### gather data for base figure
-ratio<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
-	select(News.mentions, Policy.mentions, Twitter.mentions, OA, SJRfac, year, Journal) %>%
-	gather(source, mentions, -SJRfac, -OA, -year, -Journal) 
+# ratio<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
+# 	select(News.mentions, Policy.mentions, Twitter.mentions, OA, SJRfac, year, Journal) %>%
+# 	gather(source, mentions, -SJRfac, -OA, -year, -Journal) 
 
 library(lme4)
-news<-glmer(log10(mentions+1) ~ OA * SJRfac + (1 | year) + (1 | Journal),family='Gamma', 
-			ratio[ratio$source=='News.mentions',])
-twitter<-glmer(log10(mentions+1) ~ OA * SJRfac + (1 | year) + (1 | Journal),family='Gamma', 
-			ratio[ratio$source=='Twitter.mentions',])
-policy<-glmer(log10(mentions+1) ~ OA * SJRfac + (1 | year) + (1 | Journal),family='Gamma', 
-			ratio[ratio$source=='Policy.mentions',])
+news<-glmer(mentions ~ OA * SJRfac + (1 | year) + (1 | Journal),family='poisson', 
+			ratio[ratio$source=='news',])
+summary(news)
+hist(resid(news))
 
 
-ratio$xlim<-ifelse(ratio$OA=='Open', as.numeric(ratio$SJRfac)+0.1, as.numeric(ratio$SJRfac)-0.1)
+news.dat<-expand.grid(OA = unique(ratio$OA), SJRfac=unique(ratio$SJRfac), year = 2008, Journal='Ecology')
+news.dat$p<-predict(news, newdat=news.dat, re.form=NA, type='response')
+news.dat$source<-'news'
+ggplot(news.dat, aes(SJRfac, p, col=OA)) + geom_point() + labs(y = 'news mentions')
+
+
+twitter<-glmer(mentions ~ OA * SJRfac + (1 | year) + (1 | Journal),family='poisson', 
+			ratio[ratio$source=='twitter',])
+summary(twitter)
+hist(resid(twitter))
+
+twitter.dat<-expand.grid(OA = unique(ratio$OA), SJRfac=unique(ratio$SJRfac), year = 2010, Journal='Nature')
+twitter.dat$p<-predict(twitter, newdat=twitter.dat, re.form=NA, type='response')
+twitter.dat$source<-'twitter'
+ggplot(twitter.dat, aes(SJRfac, p, col=OA)) + geom_point() + labs(y = 'twitter mentions')
+
+
+policy<-glmer(mentions ~ OA * SJRfac + (1 | year) + (1 | Journal),family='poisson', 
+			ratio[ratio$source=='policy',])
+hist(resid(policy))
+
+policy.dat<-expand.grid(OA = unique(ratio$OA), SJRfac=unique(ratio$SJRfac), year = 2010, Journal='Nature')
+policy.dat$p<-predict(policy, newdat=policy.dat, re.form=NA, type='response')
+policy.dat$source<-'policy'
+ggplot(policy.dat, aes(SJRfac, p, col=OA)) + geom_point() + labs(y = 'policy mentions')
+
+ratio.plot<-rbind(news.dat, twitter.dat, policy.dat)
+ratio.plot$xlim<-ifelse(ratio.plot$OA=='Open', as.numeric(ratio.plot$SJRfac)+0.1, as.numeric(ratio.plot$SJRfac)-0.1)
 
 ## plot
-pdf(file='figures/X_fig_altmetric.pdf', height=2, width=8)
+pdf(file='figures/X_fig_altmetric_modelled.pdf', height=2, width=8)
 layout(matrix(c(1,2,3), nrow=1))
 cols<-c('#d8b365', '#5ab4ac')
 cx.ax=0.9
 par(mar=c(2.5,4,2,0))
 ## news
-with(ratio[ratio$source=='News.mentions' & ratio$OA=='Closed',], 
-		plotCI(xlim, mean, ui=mean+2*se, li=mean-2*se, pch=19,cex=1.5, sfrac=0, 
-			axes=F, xlim=c(0.75, 4.25), xlab='', ylab='',
+with(ratio.plot[ratio.plot$source=='news' & ratio.plot$OA=='Closed',], 
+		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
+			axes=F, xlim=c(0.75, 4.25), xlab='', ylab='', ylim=c(0, 0.7),
 			scol=cols[1], col=cols[1]))
-with(ratio[ratio$source=='News.mentions' & ratio$OA=='Open',], 
-		plotCI(xlim, mean, ui=mean+2*se, li=mean-2*se, pch=19,cex=1.5, sfrac=0,
+with(ratio.plot[ratio.plot$source=='news' & ratio.plot$OA=='Open',], 
+		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
 			scol=cols[2], col=cols[2], add=TRUE))
 axis(1, at=c(1:4), labels=c('Low', 'Medium', 'High', 'Very high'), cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
@@ -88,12 +115,12 @@ mtext(2, text='Mean mentions', line=2.5, cex=0.8)
 
 par(mar=c(2.5,2,2,2))
 ## policy
-with(ratio[ratio$source=='Policy.mentions' & ratio$OA=='Closed',], 
-		plotCI(xlim, mean, ui=mean+2*se, li=mean-2*se, pch=19,cex=1.5, sfrac=0, 
+with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Closed',], 
+		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
 			axes=F, xlim=c(0.75, 4.25), xlab='', ylab='', ylim=c(0,0.7),
 			scol=cols[1], col=cols[1]))
-with(ratio[ratio$source=='Policy.mentions' & ratio$OA=='Open',], 
-		plotCI(xlim, mean, ui=mean+2*se, li=mean-2*se, pch=19,cex=1.5, sfrac=0,
+with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Open',], 
+		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
 			scol=cols[2], col=cols[2], add=TRUE))
 axis(1, at=c(1:4), labels=c('Low', 'Medium', 'High', 'Very high'), cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
@@ -101,19 +128,19 @@ add_label(0.01, 0.1, 'Policy', font=2, cex=1)
 
 par(mar=c(2.5,0,2,4))
 ## twitter
-with(ratio[ratio$source=='Twitter.mentions' & ratio$OA=='Closed',], 
-		plotCI(xlim, mean, ui=mean+2*se, li=mean-2*se, pch=19,cex=1.5, sfrac=0, 
-			axes=F, xlim=c(0.75, 4.25), xlab='', ylab='', ylim=c(0,30),
+with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Closed',], 
+		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
+			axes=F, xlim=c(0.75, 4.25), xlab='', ylab='', ylim=c(0,10),
 			scol=cols[1], col=cols[1]))
-with(ratio[ratio$source=='Twitter.mentions' & ratio$OA=='Open',], 
-		plotCI(xlim, mean, ui=mean+2*se, li=mean-2*se, pch=19,cex=1.5, sfrac=0,
+with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Open',], 
+		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
 			scol=cols[2], col=cols[2], add=TRUE))
 axis(1, at=c(1:4), labels=c('Low', 'Medium', 'High', 'Very high'), cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
 add_label(0.01, 0.1, 'Twitter', font=2, cex=1)
 
 par(xpd=T)
-legend('bottomright', legend=c('Open', 'Closed'), 
+legend('topright', legend=c('Open', 'Closed'), 
 	col=rev(cols), pch=19, bty='n', inset=c(-0.2, 0), cex=0.9)
 
 dev.off()

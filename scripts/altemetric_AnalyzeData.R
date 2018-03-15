@@ -74,8 +74,9 @@ pdf(file='figures/exploratory/altmetric/predicted_mentions.pdf', height=7, width
 par(mfrow=c(2,2), mar=c(4,4,1,1))
 
 ## Total mentions
-m1<-glmer(Altmetric.Attention.Score ~ SJR * OA + (1 | year) + (1 | Journal), alt, family='poisson')
+m1<-glmer(Altmetric.Attention.Score ~ SJRfac * OA + (1 | year) + (1 | Journal), alt, family='poisson')
 summary(m1)
+hist(resid(m1))
 
 pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
 
@@ -89,6 +90,7 @@ legend('topleft', legend=c('Open', 'Closed'), lty=1, col=c('darkblue', 'darkred'
 ## News mentions
 m1<-glmer(News.mentions ~ SJR * OA + (1 | year) + (1 | Journal), alt, family='poisson')
 summary(m1)
+hist(resid(m1))
 
 pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
 
@@ -102,6 +104,7 @@ lines(1:18, p[19:36], type='l', col='darkred', lwd=2)
 ## Twitter mentions
 m1<-glmer(Twitter.mentions ~ SJR * OA + (1 | year) + (1 | Journal), alt, family='poisson')
 summary(m1)
+hist(resid(m1))
 
 pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
 
@@ -114,6 +117,7 @@ lines(1:18, p[19:36], type='l', col='darkred', lwd=2)
 ## Policy mentions
 m1<-glmer(Policy.mentions ~ SJR * OA + (1 | year) + (1 | Journal), alt, family='poisson')
 summary(m1)
+hist(resid(m1))
 
 pred.dat<-expand.grid(SJR=seq(1,max(alt$SJR), 1), year=2011, OA=c('TRUE', 'FALSE'), Journal='Nature Climate Change')
 
