@@ -89,5 +89,7 @@ pf1<-pfit1 + theme_classic() +
 quartz(width=3.5,height=2.5)
 pf1
 
-
+pdf("./figures/Scopus_glmer_fig.pdf",width=3.5,height=2.5)
+pf1
+dev.off()
 
