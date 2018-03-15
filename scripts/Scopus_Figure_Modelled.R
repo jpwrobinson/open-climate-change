@@ -16,10 +16,8 @@ setwd('/Users/robins64/Documents/git_repos/open-climate-change')
 
 ## load data
 load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - journals with > 200 papers in last 10 years
-full.scop<-read.csv("./Data/ScopusOAData_20180214TT.csv",stringsAsFactors = F)
+load('./Data/scopus_glmerfit.Rdata')
 
-head(scop)
-head(full.scop)
 
 ## choose filtered data or full data
 dat<-scop
@@ -29,10 +27,7 @@ jour.dat<-dat[,c("Source.title","X2016.CiteScore","X2016.SJR","X2016.SNIP","Jour
 jour.dat<-jour.dat[-which(duplicated(jour.dat)),]
 
 ## bin for journal rankings
-#Jour.Var<-"X2016.CiteScore"  ## Choose metric: "X2016.CiteScore" or "X2016.SJR" or "X2016.SNIP"
 Jour.Var<-"X2016.SJR"     ## Use this
-#Jour.Var<-"X2016.SNIP"
-
 bins<-quantile(jour.dat[,Jour.Var],na.rm=T)  ##quantile bins
 
 ## write out journal list with bins
@@ -44,7 +39,7 @@ dat$jour.bin<-cut(dat[,Jour.Var],breaks = bins,labels = LETTERS[1:(length(bins)-
 dat$jour.bin[which(is.na(dat$jour.bin))]<-"A"
 
 
-
+#############################
 ####### MODEL FIT TO AGGREGATED BY JOURNAL ########
 names(dat)
 sub.dat<-dat[,c("Source.title","Year","Cited.by","OA","Open.Access","jour.bin")]
@@ -59,23 +54,40 @@ hist(resid(fit5a))
 fit5b<-glmer(MeanCite ~ jour.bin*OA + (1|Year),data=mod.dat,family="poisson")
 quartz()
 hist(resid(fit5b))
+plot(resid(fit5b)~fitted(fit5b))
 
 ## save model output
 save(fit5b, file='./Data/scopus_glmerfit.Rdata')
+###########################
+
+
+
+######### PLOT model fit data ##########
 
 
 scop.dat<-expand.grid(OA = unique(mod.dat$OA), jour.bin=unique(mod.dat$jour.bin), year = 2008, Journal='Ecology')
 scop.dat$p<-predict(fit5b, newdat=scop.dat, re.form=NA, type='response')
 
-quartz()
-ggplot(scop.dat,aes(x=jour.bin,y=p,shape=OA)) + geom_point()
+
+scop.dat$OA<-factor(scop.dat$OA,levels=c(TRUE,FALSE))
+scop.dat$xdummy<-as.numeric(as.factor(scop.dat$jour.bin)) + ifelse(scop.dat$OA==TRUE,-0.15,+0.15)
+
+pfit1<-ggplot(scop.dat)
+pf1<-pfit1 + theme_classic() + 
+  theme(legend.title =  element_blank(),
+        axis.title.x = element_blank()
+  ) + 
+  ylab("Citations") +
+  geom_point(aes(x=xdummy,y=p,colour=jour.bin,shape=OA)) +
+  scale_x_continuous(breaks = seq(1:4),labels=c("Low","Medium","High","Very high"),
+                     expand=c(0,0)) +
+  coord_cartesian(xlim=c(0.5,4.5)) + 
+  scale_shape_manual(values = c(1,19),labels=c("Open","Closed")) + 
+  scale_colour_discrete(guide=F)
 
 
-
-
-
-
-
+quartz(width=3.5,height=2.5)
+pf1
 
 
 
