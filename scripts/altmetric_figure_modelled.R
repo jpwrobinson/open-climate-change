@@ -94,6 +94,9 @@ ggplot(policy.dat, aes(SJRfac, p, col=OA)) + geom_point() + labs(y = 'policy men
 ratio.plot<-rbind(news.dat, twitter.dat, policy.dat)
 ratio.plot$xlim<-ifelse(ratio.plot$OA=='Open', as.numeric(ratio.plot$SJRfac)+0.1, as.numeric(ratio.plot$SJRfac)-0.1)
 
+save(ratio.plot, news, twitter, policy, alt, file='Data/altmetric_glmer_fit.Rdata')
+
+
 ## plot
 pdf(file='figures/X_fig_altmetric_modelled.pdf', height=2, width=8)
 layout(matrix(c(1,2,3), nrow=1))

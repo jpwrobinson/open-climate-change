@@ -46,18 +46,19 @@ sub.dat<-dat[,c("Source.title","Year","Cited.by","OA","Open.Access","jour.bin")]
 mod.dat<-ddply(sub.dat,.(Source.title,Year,Open.Access,OA,jour.bin),summarize,
                MeanCite = mean(Cited.by,na.rm=T))
 
+mod.dat$log10MeanCite<-log10(mod.dat$MeanCite+1)
 
-fit5a<-lmer(MeanCite ~ jour.bin*OA + (1|Year),data=mod.dat)
+fit5a<-lmer(log10MeanCite ~ jour.bin*OA + (1|Year) + (1 | Source.title),data=mod.dat)
 summary(fit5a)
 hist(resid(fit5a))
 
-fit5b<-glmer(MeanCite ~ jour.bin*OA + (1|Year),data=mod.dat,family="poisson")
-quartz()
-hist(resid(fit5b))
-plot(resid(fit5b)~fitted(fit5b))
+# fit5b<-glmer(MeanCite ~ jour.bin*OA + (1|Year),data=mod.dat,family="poisson")
+# quartz()
+# hist(resid(fit5b))
+# plot(resid(fit5b)~fitted(fit5b))
 
 ## save model output
-save(fit5b, file='./Data/scopus_glmerfit.Rdata')
+save(fit5a, mod.dat, file='./Data/scopus_glmerfit.Rdata')
 ###########################
 
 
