@@ -21,7 +21,7 @@ add_label <- function(xfrac, yfrac, label, pos = 4, ...){
 load('Data/scopus_glmerfit.Rdata')
 pred<-expand.grid(OA =unique(mod.dat$OA), jour.bin=unique(mod.dat$jour.bin), Year = 2007, Source.title='Nature')
 pred$p<-predict(fit5a, newdata=pred, re.form = NA)
-pred$xlim<-ifelse(pred$OA=='Open', as.numeric(pred$jour.bin)+0.1, as.numeric(pred$jour.bin)-0.1)
+pred$xlim<-ifelse(pred$OA==TRUE, as.numeric(pred$jour.bin)+0.1, as.numeric(pred$jour.bin)-0.1)
 
 ## load altmetric data
 load('Data/altmetric_glmer_fit.Rdata')
@@ -38,7 +38,7 @@ par(mar=c(2.5,4,2,0))
 ## scopus
 with(pred[pred$OA==FALSE,], 
 		plotCI(xlim, 10^p, ui=10^p, li=10^p, pch=19,cex=1.5, sfrac=0, 
-			axes=F, xlim=c(0.75, 4.25), xlab='', ylab='', ylim=c(0, 0.7),
+			axes=F, xlim=c(0.75, 4.25), xlab='', ylab='', ylim=c(0, 60),
 			scol=cols[1], col=cols[1]))
 with(pred[pred$OA==TRUE,], 
 		plotCI(xlim, 10^p, ui=10^p, li=10^p, pch=19,cex=1.5, sfrac=0,
@@ -75,7 +75,7 @@ axis(1, at=c(1:4), labels=c('Low', 'Medium', 'High', 'Very high'), cex.axis=cx.a
 axis(2, cex.axis=cx.ax)
 add_label(0.01, 0.1, 'Policy', font=2, cex=1)
 
-par(mar=c(2.5,0,2,4))
+par(mar=c(2.5,1,2,3))
 ## twitter
 with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Closed',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 

@@ -49,8 +49,15 @@ mod.dat<-ddply(sub.dat,.(Source.title,Year,Open.Access,OA,jour.bin),summarize,
 mod.dat$log10MeanCite<-log10(mod.dat$MeanCite+1)
 
 fit5a<-lmer(log10MeanCite ~ jour.bin*OA + (1|Year) + (1 | Source.title),data=mod.dat)
+with(mod.dat, table(jour.bin, OA))
+## compare raw data
+# dat$log10Cite<-log10(dat$Cited.by+1)
+# fit5a<-lmer(log10Cite ~ jour.bin*OA + (1|Year) + (1 | Source.title),data=dat)
+AIC(fit5a)
 summary(fit5a)
+visreg(fit5a, 'jour.bin', by='OA')
 hist(resid(fit5a))
+plot(fitted(fit5a) ~ mod.dat$log10MeanCite)
 
 fit5b<-glmer(log10(Cited.by+1) ~ jour.bin*OA + (1|Year),data=dat,family="poisson")
 hist(resid(fit5b))
