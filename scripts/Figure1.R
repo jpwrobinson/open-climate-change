@@ -46,7 +46,7 @@ with(pred[pred$OA==TRUE,],
 axis(1, at=c(1:4), labels=c('Low', 'Medium', 'High', 'Very high'), cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
 add_label(0.01, 0.1, 'Scopus citations', font=2, cex=1)
-mtext(2, text='Mean mentions', line=2.5, cex=0.8)
+mtext(2, text='Mean citations/mentions', line=2.5, cex=0.8)
 
 par(mar=c(2.5,2,2,2))
 ## news
