@@ -52,10 +52,39 @@ fit5a<-lmer(log10MeanCite ~ jour.bin*OA + (1|Year) + (1 | Source.title),data=mod
 summary(fit5a)
 hist(resid(fit5a))
 
-# fit5b<-glmer(MeanCite ~ jour.bin*OA + (1|Year),data=mod.dat,family="poisson")
+fit5b<-glmer(log10(Cited.by+1) ~ jour.bin*OA + (1|Year),data=dat,family="poisson")
+hist(resid(fit5b))
+plot(resid(fit5b)~fitted(fit5b))
+plot(fitted(fit5b)~log10(dat$Cited.by+1))
+
+
 # quartz()
 # hist(resid(fit5b))
 # plot(resid(fit5b)~fitted(fit5b))
+
+fit5c<-glmer(MeanCite ~ jour.bin*OA + (1|Year),data=mod.dat,family="poisson")
+hist(resid(fit5c))
+plot(resid(fit5c)~fitted(fit5c))
+plot(fitted(fit5c)~mod.dat$MeanCite)
+
+
+fit5d<-glmer(log10(MeanCite+1) ~ jour.bin*OA + (1|Year),data=mod.dat,family="poisson")
+hist(resid(fit5d))
+plot(resid(fit5d)~fitted(fit5d))
+plot(fitted(fit5d)~log10(mod.dat$MeanCite+1))
+
+
+fit5e<-glmer(MeanCite ~ jour.bin*OA + (1|Year) + (1|Source.title),data=mod.dat,family="poisson")
+hist(resid(fit5e))
+plot(resid(fit5e)~fitted(fit5e))
+plot(fitted(fit5e)~mod.dat$MeanCite)
+
+fit5f<-glmer(log10(MeanCite+1) ~ jour.bin*OA + (1|Year) + (1|Source.title),data=mod.dat,family="poisson")
+hist(resid(fit5f))
+plot(resid(fit5f)~fitted(fit5f))
+plot(fitted(fit5f)~log10(mod.dat$MeanCite+1))
+
+
 
 ## save model output
 save(fit5a, mod.dat, file='./Data/scopus_glmerfit.Rdata')
