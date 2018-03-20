@@ -49,15 +49,10 @@ mod.dat<-ddply(sub.dat,.(Source.title,Year,Open.Access,OA,jour.bin),summarize,
 mod.dat$log10MeanCite<-log10(mod.dat$MeanCite+1)
 
 fit5a<-lmer(log10MeanCite ~ jour.bin*OA + (1|Year) + (1 | Source.title),data=mod.dat)
-with(mod.dat, table(jour.bin, OA))
-## compare raw data
-# dat$log10Cite<-log10(dat$Cited.by+1)
-# fit5a<-lmer(log10Cite ~ jour.bin*OA + (1|Year) + (1 | Source.title),data=dat)
-AIC(fit5a)
 summary(fit5a)
-visreg(fit5a, 'jour.bin', by='OA')
 hist(resid(fit5a))
-plot(fitted(fit5a) ~ mod.dat$log10MeanCite)
+plot(resid(fit5a)~fitted(fit5a))
+plot(fitted(fit5a)~mod.dat$log10MeanCite)
 
 fit5b<-glmer(log10(Cited.by+1) ~ jour.bin*OA + (1|Year),data=dat,family="poisson")
 hist(resid(fit5b))
@@ -92,6 +87,12 @@ plot(resid(fit5f)~fitted(fit5f))
 plot(fitted(fit5f)~log10(mod.dat$MeanCite+1))
 
 
+fit5g<-lmer(log10(Cited.by+1) ~ jour.bin*OA + (1|Year) + (1 | Source.title),data=dat)
+summary(fit5g)
+hist(resid(fit5g))
+plot(resid(fit5g)~fitted(fit5g))
+plot(fitted(fit5g)~log10(dat$Cited.by+1))
+
 
 ## save model output
 save(fit5a, mod.dat, file='./Data/scopus_glmerfit.Rdata')
@@ -103,7 +104,7 @@ save(fit5a, mod.dat, file='./Data/scopus_glmerfit.Rdata')
 
 
 scop.dat<-expand.grid(OA = unique(mod.dat$OA), jour.bin=unique(mod.dat$jour.bin), year = 2008, Journal='Ecology')
-scop.dat$p<-predict(fit5b, newdat=scop.dat, re.form=NA, type='response')
+scop.dat$p<-predict(fit5a, newdat=scop.dat, re.form=NA, type='response')
 
 
 scop.dat$OA<-factor(scop.dat$OA,levels=c(TRUE,FALSE))
@@ -115,7 +116,7 @@ pf1<-pfit1 + theme_classic() +
         axis.title.x = element_blank()
   ) + 
   ylab("Citations") +
-  geom_point(aes(x=xdummy,y=p,colour=jour.bin,shape=OA)) +
+  geom_point(aes(x=xdummy,y=10^p,colour=jour.bin,shape=OA)) +
   scale_x_continuous(breaks = seq(1:4),labels=c("Low","Medium","High","Very high"),
                      expand=c(0,0)) +
   coord_cartesian(xlim=c(0.5,4.5)) + 
