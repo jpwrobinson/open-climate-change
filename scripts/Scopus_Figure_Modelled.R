@@ -47,8 +47,9 @@ mod.dat<-ddply(sub.dat,.(Source.title,Year,Open.Access,OA,jour.bin),summarize,
                MeanCite = mean(Cited.by,na.rm=T))
 
 mod.dat$log10MeanCite<-log10(mod.dat$MeanCite+1)
+mod.dat$jour.bin.scaled<-scale(as.numeric(mod.dat$jour.bin))
 
-fit5a<-lmer(log10MeanCite ~ jour.bin*OA + (1|Year) + (1 | Source.title),data=mod.dat)
+fit5a<-lmer(log10MeanCite ~ jour.bin.scaled*OA + (1|Year) + (1 | Source.title),data=mod.dat)
 with(mod.dat, table(jour.bin, OA))
 ## compare raw data
 # dat$log10Cite<-log10(dat$Cited.by+1)
