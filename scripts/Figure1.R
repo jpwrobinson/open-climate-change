@@ -59,7 +59,7 @@ with(pred[pred$OA==TRUE,],
 axis(1, at=unique(mod.dat$jour.bin.scaled), labels=c('Low', 'Medium', 'High', 'Very high'), cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
 add_label(0.01, 0.1, 'Scopus citations', font=2, cex=1)
-mtext(2, text='Mean mentions', line=2.5, cex=0.8)
+mtext(2, text='Mean citations/mentions', line=2.5, cex=0.8)
 
 clip(-10, max(ratio.plot$xlim), 0, 100)
 abline(h=10^scopus.avg[1], col=alpha(cols[1], 0.5), lty=2)
