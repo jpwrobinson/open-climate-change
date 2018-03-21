@@ -79,9 +79,24 @@ names(dat)
 
 sum.dat<-ddply(dat,.(Year,bin,OA),summarize,
          NoArt = length(OA))
+sum.totdat<-ddply(dat,.(Year,bin),summarize,
+                  NoArt = length(bin))
 
 p1<-ggplot(sum.dat)
-p1 + geom_line(aes(x=Year,y=NoArt,colour=bin,linetype=OA))
+p1f<-p1 + geom_line(aes(x=Year,y=NoArt,colour=bin,linetype=OA)) + 
+  ylab("# publications") 
+p1f
+
+p2<-ggplot(sum.totdat)
+p2f<-p2 + geom_area(aes(x=Year,y=NoArt,fill=bin),alpha=0.6) + 
+  ylab("# publications")
+p2f  
+
+
+pdf("./figures/exploratory/scopus/articlesovertime.pdf")
+p1f
+p2f
+dev.off()
 
 
 

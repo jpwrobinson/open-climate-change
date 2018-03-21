@@ -93,6 +93,13 @@ hist(resid(fit5g))
 plot(resid(fit5g)~fitted(fit5g))
 plot(fitted(fit5g)~log10(dat$Cited.by+1))
 
+fit5h<-lmer(log10(MeanCite+1) ~ jour.bin*OA + (1|Year) + (1 | Source.title),data=mod.dat)
+summary(fit5h)
+hist(resid(fit5h))
+plot(resid(fit5h)~fitted(fit5h))
+plot(fitted(fit5h)~log10(mod.dat$MeanCite+1))
+
+
 
 ## save model output
 save(fit5a, mod.dat, file='./Data/scopus_glmerfit.Rdata')
