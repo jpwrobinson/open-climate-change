@@ -104,6 +104,13 @@ plot(resid(fit5h)~fitted(fit5h))
 plot(fitted(fit5h)~log10(mod.dat$MeanCite+1))
 
 
+fit5i<-lmer(log10(MeanCite+1) ~ jour.bin*OA + (1|Year) + (1 | Source.title),data=mod.dat)
+summary(fit5i)
+hist(resid(fit5i))
+plot(resid(fit5i)~fitted(fit5i))
+plot(fitted(fit5i)~log10(mod.dat$MeanCite+1))
+AIC(fit5i)
+
 
 ## save model output
 save(fit5a, mod.dat, file='./Data/scopus_glmerfit.Rdata')
@@ -113,9 +120,10 @@ save(fit5a, mod.dat, file='./Data/scopus_glmerfit.Rdata')
 
 ######### PLOT model fit data ##########
 
+mod.plot<-fit5i
 
 scop.dat<-expand.grid(OA = unique(mod.dat$OA), jour.bin=unique(mod.dat$jour.bin), year = 2008, Journal='Ecology')
-scop.dat$p<-predict(fit5a, newdat=scop.dat, re.form=NA, type='response')
+scop.dat$p<-predict(mod.plot, newdat=scop.dat, re.form=NA, type='response')
 
 
 scop.dat$OA<-factor(scop.dat$OA,levels=c(TRUE,FALSE))

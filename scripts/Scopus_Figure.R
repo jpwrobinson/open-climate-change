@@ -79,24 +79,74 @@ names(dat)
 
 sum.dat<-ddply(dat,.(Year,bin,OA),summarize,
          NoArt = length(OA))
+sum.dat$OAfac<-ifelse(sum.dat$OA==T,"Open","Closed")
+#sum.dat$OA<-NULL
+
 sum.totdat<-ddply(dat,.(Year,bin),summarize,
                   NoArt = length(bin))
+sum.totdat$OA<-FALSE
+sum.totdat$OAfac<-"Total"
+
+
+
+sum.dat<-rbind(sum.dat,sum.totdat)
+sub.sum<-sum.dat[sum.dat$Year %in% c(2007,2011,2016),]
+sub.sum$dummyYear<-ifelse(sub.sum$Year==2007,1,ifelse(sub.sum$Year==2011,2,3))
+sub.sum$dummyx<-ifelse(sub.sum$OA==T,sub.sum$dummyYear-0.15,sub.sum$dummyYear+0.15)
+
+sub.sum$dummyx<-ifelse(sub.sum$bin=="A",sub.sum$dummyYear-0.3,
+                       ifelse(sub.sum$bin=="B",sub.sum$dummyYear-0.1,
+                              ifelse(sub.sum$bin=="C",sub.sum$dummyYear+0.1,sub.sum$dummyYear+0.3)))
+
+sub.sum$dummyx2<-sub.sum$dummyx+100
+
 
 p1<-ggplot(sum.dat)
-p1f<-p1 + geom_line(aes(x=Year,y=NoArt,colour=bin,linetype=OA)) + 
-  ylab("# publications") 
+p1f<-p1 + theme_classic() + 
+  geom_line(aes(x=Year,y=NoArt,colour=bin,linetype=OA)) + 
+  ylab("# publications") + 
+  coord_cartesian(expand=F)
 p1f
 
 p2<-ggplot(sum.totdat)
-p2f<-p2 + geom_area(aes(x=Year,y=NoArt,fill=bin),alpha=0.6) + 
-  ylab("# publications")
-p2f  
+p2f<-p2 + theme_classic() +
+  geom_area(aes(x=Year,y=NoArt,fill=bin),alpha=0.6) + 
+  ylab("# publications") + 
+  coord_cartesian(expand=F)
+p2f
+
+p3<-ggplot(sum.dat)
+p3f<-p3 + theme_classic() + 
+  
 
 
 pdf("./figures/exploratory/scopus/articlesovertime.pdf")
 p1f
 p2f
 dev.off()
+
+
+p4<-ggplot(sub.sum)
+p4f<-p4 + theme_classic() + 
+  theme(axis.title.x = element_blank()) +
+  ylab("# articles") + 
+  geom_bar(aes(x=dummyx,y=NoArt,fill=bin,colour=bin),data=sub.sum[sub.sum$OAfac=="Total",],
+           stat="identity",position="dodge",alpha=0.3) + 
+  scale_fill_discrete(name = "Journal bin") +
+  scale_colour_discrete(guide=F) +
+  geom_bar(aes(x=dummyx,y=NoArt,fill=bin),colour="black",data=sub.sum[sub.sum$OAfac=="Open",],
+           stat="identity",position="dodge",alpha=0.5,show.legend = F) + 
+  #geom_bar(aes(x=dummyx2,y=NoArt,colour=OA),data=sub.sum[which(sub.sum$OAfac!="Total"),],
+  #         fill="grey80",stat="identity",position="dodge",alpha=0.5) +
+  scale_x_continuous(labels=c(2007,2011,2016),breaks=c(1,2,3)) +
+  scale_y_continuous(expand = c(0,0)) +
+  coord_cartesian(xlim=c(0.6,3.4)) 
+
+pdf("./figures/exploratory/scopus/articlespublishedfig.pdf")
+p4f
+dev.off()
+
+
 
 
 
