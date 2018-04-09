@@ -95,24 +95,6 @@ abline(h=news.avg[2], col=alpha(cols[2], 0.5), lty=2)
 
 # mtext(2, text='Mean mentions', line=2.5, cex=0.8)
 
-par(mar=c(1.5,1.5, 1.5, 1.5), xpd=FALSE)
-## policy
-with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Closed',], 
-		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
-			axes=F, xlim=c(-1.5, 1.5), xlab='', ylab='', ylim=c(0.1,0.5),
-			scol=cols[1], col=cols[1]))
-with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Open',], 
-		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
-			scol=cols[2], col=cols[2], add=TRUE))
-axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=c('Low', 'Medium', 'High', 'Very high'), cex.axis=cx.ax)
-axis(2, cex.axis=cx.ax)
-add_label(0.01, 0.1, 'C) Policy', font=2, cex=0.9)
-
-clip(-10, max(ratio.plot$xlim), 0, 100)
-abline(h=policy.avg[1], col=alpha(cols[1], 0.5), lty=2)
-abline(h=policy.avg[2], col=alpha(cols[2], 0.5), lty=2)
-# par(xpd=NA)
-# text(max(ratio.plot$xlim)+0.1, policy.avg[1], label=round(policy.avg[1], 2), col='grey',cex=0.8)
 
 
 par(mar=c(1.5,1.5, 1.5, 1.5), xpd=FALSE)
@@ -126,13 +108,33 @@ with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Open',],
 			scol=cols[2], col=cols[2], add=TRUE))
 axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=c('Low', 'Medium', 'High', 'Very high'), cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
-add_label(0.01, 0.1, 'D) Twitter', font=2, cex=0.9)
+add_label(0.01, 0.1, 'C) Twitter', font=2, cex=0.9)
 
 clip(-10, max(ratio.plot$xlim), 0, 100)
 abline(h=twitter.avg[1], col=alpha(cols[1], 0.5), lty=2)
 abline(h=twitter.avg[2], col=alpha(cols[2], 0.5), lty=2)
 # par(xpd=NA)
 # text(max(ratio.plot$xlim)+0.1, twitter.avg[1], label=round(twitter.avg[1], 2), col='grey',cex=0.8)
+
+
+par(mar=c(1.5,1.5, 1.5, 1.5), xpd=FALSE)
+## policy
+with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Closed',], 
+		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
+			axes=F, xlim=c(-1.5, 1.5), xlab='', ylab='', ylim=c(0.1,0.5),
+			scol=cols[1], col=cols[1]))
+with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Open',], 
+		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
+			scol=cols[2], col=cols[2], add=TRUE))
+axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=c('Low', 'Medium', 'High', 'Very high'), cex.axis=cx.ax)
+axis(2, cex.axis=cx.ax)
+add_label(0.01, 0.1, 'D) Policy', font=2, cex=0.9)
+
+clip(-10, max(ratio.plot$xlim), 0, 100)
+abline(h=policy.avg[1], col=alpha(cols[1], 0.5), lty=2)
+abline(h=policy.avg[2], col=alpha(cols[2], 0.5), lty=2)
+# par(xpd=NA)
+# text(max(ratio.plot$xlim)+0.1, policy.avg[1], label=round(policy.avg[1], 2), col='grey',cex=0.8)
 
 
 par(xpd=T)
