@@ -4,7 +4,7 @@ rm(list=ls())
 setwd("~/GitHub/open-climate-change/")
 setwd('/Users/robins64/Documents/git_repos/open-climate-change')
 
-j.dat<-read.csv("./Data/JournalList_Scopus.csv",stringsAsFactors = F,na.strings=c(NA,""))
+j.dat<-read.csv("Data/JournalList_Scopus.csv",stringsAsFactors = F,na.strings=c(NA,""))
 
 scop<-read.csv('Data/ScopusOAData_20180214TT.csv')
 
@@ -26,13 +26,13 @@ scop$Publisher.s.Country <- NULL
 scop$OA<-ifelse(is.na(scop$Journal.Open.Access), FALSE, TRUE)
 
 ## remove inactive journals
-scop$active<-j.dat$Active.or.Inactive[match(scop$Source.title, j.dat$Source.Title)]
-scop<-scop[which(scop$active=='Active'),]
+# scop$active<-j.dat$Active.or.Inactive[match(scop$Source.title, j.dat$Source.Title)]
+# scop<-scop[which(scop$active=='Active'),]
 
 t<-aggregate(Authors ~ Source.title, scop, length)
 
 ## fair to just take the journals with highest number of papers?
-journal.list<-t$Source.title[t$Authors>300] ## n = 53
+journal.list<-t$Source.title[t$Authors>200] ## n = 53
 journal.list<-data.frame(journal=journal.list)
 ## add ISSN for altmetric search
 journal.list$ISSN<-j.dat$E.ISSN[match(journal.list$journal, j.dat$Source.Title)]
