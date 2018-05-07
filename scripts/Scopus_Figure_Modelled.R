@@ -29,6 +29,12 @@ jour.dat<-jour.dat[-which(duplicated(jour.dat)),]
 ## bin for journal rankings
 Jour.Var<-"X2016.SJR"     ## Use this
 bins<-quantile(jour.dat[,Jour.Var],na.rm=T)  ##quantile bins
+bins
+ #     0%     25%     50%     75%    100% 
+ # 0.1380  1.1590  1.7430  2.6635 18.1340
+
+
+# ggplot(jour.dat, aes(x = X2016.SJR)) + geom_histogram() + scale_x_log10()
 
 ## write out journal list with bins
 jour.dat$bin<-cut(jour.dat[,Jour.Var],breaks = bins,labels = LETTERS[1:(length(bins)-1)])
@@ -38,7 +44,7 @@ jour.dat$bin[which(is.na(jour.dat$bin))]<-"A"
 dat$jour.bin<-cut(dat[,Jour.Var],breaks = bins,labels = LETTERS[1:(length(bins)-1)])
 dat$jour.bin[which(is.na(dat$jour.bin))]<-"A"
 
-
+bins1
 #############################
 ####### MODEL FIT TO AGGREGATED BY JOURNAL ########
 names(dat)

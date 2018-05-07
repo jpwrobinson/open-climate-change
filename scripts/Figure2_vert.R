@@ -45,14 +45,14 @@ quant.labs<-c('0.1-1.2', '1.2-1.7', '1.7-2.7', '2.7-18.1')
 
 
 ## plot
-pdf(file='figures/Figure2.pdf', height=2, width=8.5)
-layout(matrix(c(1,2,3,4), nrow=1))
+pdf(file='figures/Figure2_vert.pdf', height=6.5, width=2.5)
+layout(matrix(c(1,2,3,4), nrow=4))
 cols<-c('#d8b365', '#5ab4ac')
 cx.ax=0.9
 
 par(oma = c(2,2,0,0), mgp=c(3,0.6,0))
 
-par(mar=c(1.5,1.5, 1.5, 1.5), xpd=FALSE)
+par(mar=c(0.5,1.5, 0.5, 1.5), xpd=FALSE)
 
 ## scopus
 with(pred[pred$OA==FALSE,], 
@@ -62,8 +62,11 @@ with(pred[pred$OA==FALSE,],
 with(pred[pred$OA==TRUE,], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
 			scol=cols[2], col=cols[2], add=TRUE))
-axis(1, at=sort(unique(mod.dat$jour.bin.scaled)), labels=quant.labs, cex.axis=cx.ax)
+axis(1, at=sort(unique(mod.dat$jour.bin.scaled)), labels=NA, cex.axis=cx.ax)
 # axis(2, at=seq(1, 1.75, 0.05), labels=c(10^seq(1, 1.75, 0.05)), cex.axis=cx.ax)
+
+legend('topright', legend=c('Open', 'Closed'), 
+	col=rev(cols), pch=19, bty='n', inset=c(-0.05, -0.12), cex=0.9)
 
 ### log axes labels
 xBig = log10(c(seq(10, 25, 5), seq(25, 50, 5)))
@@ -83,7 +86,7 @@ with(ratio.plot[ratio.plot$source=='news' & ratio.plot$OA=='Closed',],
 with(ratio.plot[ratio.plot$source=='news' & ratio.plot$OA=='Open',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
 			scol=cols[2], col=cols[2], add=TRUE))
-axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=quant.labs, cex.axis=cx.ax)
+axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=NA, cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
 add_label(0.01, 0.1, 'B) News', font=2, cex=0.9)
 
@@ -96,8 +99,6 @@ abline(h=news.avg[2], col=alpha(cols[2], 0.5), lty=2)
 # mtext(2, text='Mean mentions', line=2.5, cex=0.8)
 
 
-
-par(mar=c(1.5,1.5, 1.5, 1.5), xpd=FALSE)
 ## twitter
 with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Closed',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
@@ -106,7 +107,7 @@ with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Closed',],
 with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Open',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
 			scol=cols[2], col=cols[2], add=TRUE))
-axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=quant.labs, cex.axis=cx.ax)
+axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=NA, cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
 add_label(0.01, 0.1, 'C) Twitter', font=2, cex=0.9)
 
@@ -117,7 +118,7 @@ abline(h=twitter.avg[2], col=alpha(cols[2], 0.5), lty=2)
 # text(max(ratio.plot$xlim)+0.1, twitter.avg[1], label=round(twitter.avg[1], 2), col='grey',cex=0.8)
 
 
-par(mar=c(1.5,1.5, 1.5, 1.5), xpd=FALSE)
+
 ## policy
 with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Closed',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
@@ -137,9 +138,7 @@ abline(h=policy.avg[2], col=alpha(cols[2], 0.5), lty=2)
 # text(max(ratio.plot$xlim)+0.1, policy.avg[1], label=round(policy.avg[1], 2), col='grey',cex=0.8)
 
 
-par(xpd=T)
-legend('topright', legend=c('Open', 'Closed'), 
-	col=rev(cols), pch=19, bty='n', inset=c(-0.05, -0.12), cex=0.9)
+
 
 mtext(2, text='Mean #', line=0.5, cex=0.8, outer=TRUE)
 mtext(1, text='Impact factor', line=0.5, cex=0.8, outer=TRUE)
