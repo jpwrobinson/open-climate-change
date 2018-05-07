@@ -50,7 +50,7 @@ layout(matrix(c(1,2,3,4), nrow=4))
 cols<-c('#d8b365', '#5ab4ac')
 cx.ax=0.9
 
-par(oma = c(2,2,0,0), mgp=c(3,0.6,0))
+par(oma = c(2.5,1.5,0,0), mgp=c(3,0.6,0))
 
 par(mar=c(0.5,1.5, 0.5, 1.5), xpd=FALSE)
 
@@ -65,8 +65,8 @@ with(pred[pred$OA==TRUE,],
 axis(1, at=sort(unique(mod.dat$jour.bin.scaled)), labels=NA, cex.axis=cx.ax)
 # axis(2, at=seq(1, 1.75, 0.05), labels=c(10^seq(1, 1.75, 0.05)), cex.axis=cx.ax)
 
-legend('topright', legend=c('Open', 'Closed'), 
-	col=rev(cols), pch=19, bty='n', inset=c(-0.05, -0.12), cex=0.9)
+legend('bottomright', legend=c('Open', 'Closed'), 
+	col=rev(cols), pch=19, bty='n', inset=c(0, 0.1), cex=0.9)
 
 ### log axes labels
 xBig = log10(c(seq(10, 25, 5), seq(25, 50, 5)))
@@ -140,7 +140,7 @@ abline(h=policy.avg[2], col=alpha(cols[2], 0.5), lty=2)
 
 
 
-mtext(2, text='Mean #', line=0.5, cex=0.8, outer=TRUE)
-mtext(1, text='Impact factor', line=0.5, cex=0.8, outer=TRUE)
+mtext(2, text='Mean #', line=0.35, cex=0.8, outer=TRUE)
+mtext(1, text='Impact factor', line=1.2, cex=0.8, outer=TRUE)
 
 dev.off()

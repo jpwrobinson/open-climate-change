@@ -43,19 +43,34 @@ sum.totdat<-ddply(dat,.(Year),summarize,
                   ClosArt = length(OA[which(OA==F)]))
 sum.totdat$Tot<-with(sum.totdat,OpenArt + ClosArt)
 
+line1<-sum.dat %>% filter(Year == 2016 & bin == 'A')
+line2<-sum.dat %>% filter(Year == 2016 & bin == 'B')
+line3<-sum.dat %>% filter(Year == 2016 & bin == 'C')
+line4<-sum.dat %>% filter(Year == 2016 & bin == 'D')
+quant.labs<-c('0.1-1.2', '1.2-1.7', '1.7-2.7', '2.7-18.1')
+tot.lab<-sum.totdat[10,2]/sum.totdat[10,4]*100
+
 p1<-ggplot(sum.dat)
 p1f<-p1 + theme_classic() + 
   theme(text = element_text(size=6),
         legend.text = element_text(size=4),
         legend.title = element_text(size=4),
         legend.key.height = unit(6,units="points")) +
+  lims(y=c(0, 45)) +
   geom_line(aes(x=Year,y=OpenPer,colour=bin),lwd=0.3) + 
   geom_line(aes(x=Year,y=(OpenArt/Tot*100)),data=sum.totdat,
             lwd=0.7) +
   ylab("OA publications (%)") + 
   coord_cartesian(expand=F) + 
-  scale_color_discrete(labels = c("Low","Medium","High","Very high"),name="Journal impact")
-  
+  scale_x_continuous(breaks=seq(2008, 2016, 2), labels=seq(2008, 2016, 2), limits= c(2007, 2017)) +
+  # scale_color_discrete(labels = c("Low","Medium","High","Very high"),name="Journal impact")
+  theme(legend.position='none') +
+  annotate('text', x = 2016.1, y = line1$OpenPer-0.5, size=1, hjust=0, label = quant.labs[1]) +
+  annotate('text', x = 2016.1, y = line2$OpenPer, size=1, hjust=0, label = quant.labs[2]) +
+  annotate('text', x = 2016.1, y = line3$OpenPer, size=1, hjust=0, label = quant.labs[3]) +
+  annotate('text', x = 2016.1, y = line4$OpenPer+1, size=1, hjust=0, label = quant.labs[4]) +
+  annotate('text', x = 2016.1, y = tot.lab, size=1.25, fontface=2, hjust=0, label = 'Total')
+
 
 
 pdf(file="./figures/Figure1.pdf", height=2, width=3)
