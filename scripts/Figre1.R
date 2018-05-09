@@ -48,6 +48,7 @@ line2<-sum.dat %>% filter(Year == 2016 & bin == 'B')
 line3<-sum.dat %>% filter(Year == 2016 & bin == 'C')
 line4<-sum.dat %>% filter(Year == 2016 & bin == 'D')
 quant.labs<-c('0.1-1.2', '1.2-1.7', '1.7-2.7', '2.7-18.1')
+bin.labs<-c('Low', 'Medium', 'High', 'Very high')
 tot.lab<-sum.totdat[10,2]/sum.totdat[10,4]*100
 
 p1<-ggplot(sum.dat)
@@ -65,11 +66,12 @@ p1f<-p1 + theme_classic() +
   scale_x_continuous(breaks=seq(2008, 2016, 2), labels=seq(2008, 2016, 2), limits= c(2007, 2017)) +
   # scale_color_discrete(labels = c("Low","Medium","High","Very high"),name="Journal impact")
   theme(legend.position='none') +
-  annotate('text', x = 2016.1, y = line1$OpenPer-0.5, size=1, hjust=0, label = quant.labs[1]) +
-  annotate('text', x = 2016.1, y = line2$OpenPer, size=1, hjust=0, label = quant.labs[2]) +
-  annotate('text', x = 2016.1, y = line3$OpenPer, size=1, hjust=0, label = quant.labs[3]) +
-  annotate('text', x = 2016.1, y = line4$OpenPer+1, size=1, hjust=0, label = quant.labs[4]) +
+  annotate('text', x = 2016.1, y = line1$OpenPer-0.5, size=1, hjust=0, label = bin.labs[1]) +
+  annotate('text', x = 2016.1, y = line2$OpenPer, size=1, hjust=0, label = bin.labs[2]) +
+  annotate('text', x = 2016.1, y = line3$OpenPer, size=1, hjust=0, label = bin.labs[3]) +
+  annotate('text', x = 2016.1, y = line4$OpenPer+0.5, size=1, hjust=0, label = bin.labs[4]) +
   annotate('text', x = 2016.1, y = tot.lab, size=1.25, fontface=2, hjust=0, label = 'Total')
+
 
 
 
@@ -83,29 +85,29 @@ dev.off()
 
 
 
-## Not use below ##
+# ## Not use below ##
 
-## graph of total number of publications for each journal bin across time
-## Journal information plot
-names(dat)
-sum.j<-ddply(dat[dat$Year==2016,],.(Source.title,Article.Open.Access,Journal.Open.Access,bin),summarize,
-             SJR = mean(X2016.SJR),
-             NoArt = length(SJR))
-name.ind<-sum.j$Source.title[duplicated(sum.j$Source.title)]
+# ## graph of total number of publications for each journal bin across time
+# ## Journal information plot
+# names(dat)
+# sum.j<-ddply(dat[dat$Year==2016,],.(Source.title,Article.Open.Access,Journal.Open.Access,bin),summarize,
+#              SJR = mean(X2016.SJR),
+#              NoArt = length(SJR))
+# name.ind<-sum.j$Source.title[duplicated(sum.j$Source.title)]
 
-jour.dat$OAtype<-"Closed"
-jour.dat$OAtype[jour.dat$Source.title %in% name.ind]<-"Hybrid"
-jour.dat$OAtype[jour.dat$Journal.Open.Access=="DOAJ/ROAD Open Access"]<-"Open"
+# jour.dat$OAtype<-"Closed"
+# jour.dat$OAtype[jour.dat$Source.title %in% name.ind]<-"Hybrid"
+# jour.dat$OAtype[jour.dat$Journal.Open.Access=="DOAJ/ROAD Open Access"]<-"Open"
 
-sum.totdat<-ddply(dat,.(Year,bin),summarize,
-                  TotArt = length(bin))
+# sum.totdat<-ddply(dat,.(Year,bin),summarize,
+#                   TotArt = length(bin))
 
-p2<-ggplot(sum.totdat)
-p2f<-p2 + theme_classic() +
-  geom_area(aes(x=Year,y=TotArt,fill=bin,colour=bin),alpha=0.6) + 
-  ylab("Total publications") + 
-  coord_cartesian(expand=F)
-p2f
+# p2<-ggplot(sum.totdat)
+# p2f<-p2 + theme_classic() +
+#   geom_area(aes(x=Year,y=TotArt,fill=bin,colour=bin),alpha=0.6) + 
+#   ylab("Total publications") + 
+#   coord_cartesian(expand=F)
+# p2f
 
 
 

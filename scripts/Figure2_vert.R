@@ -127,7 +127,7 @@ with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Closed',],
 with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Open',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
 			scol=cols[2], col=cols[2], add=TRUE))
-axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=quant.labs, cex.axis=cx.ax)
+axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=bin.labs, cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
 add_label(0.01, 0.1, 'D) Policy', font=2, cex=0.9)
 
@@ -141,6 +141,6 @@ abline(h=policy.avg[2], col=alpha(cols[2], 0.5), lty=2)
 
 
 mtext(2, text='Mean #', line=0.35, cex=0.8, outer=TRUE)
-mtext(1, text='Impact factor', line=1.2, cex=0.8, outer=TRUE)
+mtext(1, text='Journal rank', line=1.2, cex=0.8, outer=TRUE)
 
 dev.off()
