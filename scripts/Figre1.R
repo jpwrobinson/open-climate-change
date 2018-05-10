@@ -51,6 +51,10 @@ quant.labs<-c('0.1-1.2', '1.2-1.7', '1.7-2.7', '2.7-18.1')
 bin.labs<-c('Low', 'Medium', 'High', 'Very high')
 tot.lab<-sum.totdat[10,2]/sum.totdat[10,4]*100
 
+## cols
+library(RColorBrewer)
+mycols <- brewer.pal(n = 9, "Greens")[c(3,5,6,8)]
+
 p1<-ggplot(sum.dat)
 p1f<-p1 + theme_classic() + 
   theme(text = element_text(size=6),
@@ -58,12 +62,13 @@ p1f<-p1 + theme_classic() +
         legend.title = element_text(size=4),
         legend.key.height = unit(6,units="points")) +
   lims(y=c(0, 45)) +
-  geom_line(aes(x=Year,y=OpenPer,colour=bin),lwd=0.3) + 
+  geom_line(aes(x=Year,y=OpenPer,colour=bin),lwd=0.5) + 
   geom_line(aes(x=Year,y=(OpenArt/Tot*100)),data=sum.totdat,
-            lwd=0.7) +
+            lwd=0.9) +
   ylab("OA publications (%)") + 
   coord_cartesian(expand=F) + 
   scale_x_continuous(breaks=seq(2008, 2016, 2), labels=seq(2008, 2016, 2), limits= c(2007, 2017)) +
+  scale_colour_manual(values=mycols) + 
   # scale_color_discrete(labels = c("Low","Medium","High","Very high"),name="Journal impact")
   theme(legend.position='none') +
   annotate('text', x = 2016.1, y = line1$OpenPer-0.5, size=1, hjust=0, label = bin.labs[1]) +

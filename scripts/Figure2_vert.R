@@ -62,6 +62,14 @@ with(pred[pred$OA==FALSE,],
 with(pred[pred$OA==TRUE,], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
 			scol=cols[2], col=cols[2], add=TRUE))
+with(pred[1:2,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(pred[3:4,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(pred[5:6,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(pred[7:8,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
 axis(1, at=sort(unique(mod.dat$jour.bin.scaled)), labels=NA, cex.axis=cx.ax)
 # axis(2, at=seq(1, 1.75, 0.05), labels=c(10^seq(1, 1.75, 0.05)), cex.axis=cx.ax)
 
@@ -75,8 +83,8 @@ axis(2, xBig , labels=rep("", length(xBig)), tcl=-0.4)
 add_label(0.01, 0.1, 'A) Citations', font=2, cex=0.9)
 
 clip(-10, max(ratio.plot$xlim), 0, 100)
-abline(h=scopus.avg[1], col=alpha(cols[1], 0.5), lty=2)
-abline(h=scopus.avg[2], col=alpha(cols[2], 0.5), lty=2)
+abline(h=scopus.avg[1], col=alpha(cols[1], 0.5), lty=5)
+abline(h=scopus.avg[2], col=alpha(cols[2], 0.5), lty=5)
 
 ## news
 with(ratio.plot[ratio.plot$source=='news' & ratio.plot$OA=='Closed',], 
@@ -86,13 +94,21 @@ with(ratio.plot[ratio.plot$source=='news' & ratio.plot$OA=='Closed',],
 with(ratio.plot[ratio.plot$source=='news' & ratio.plot$OA=='Open',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
 			scol=cols[2], col=cols[2], add=TRUE))
+with(ratio.plot[ratio.plot$source=='news',][1:2,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(ratio.plot[ratio.plot$source=='news',][3:4,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(ratio.plot[ratio.plot$source=='news',][5:6,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(ratio.plot[ratio.plot$source=='news',][7:8,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
 axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=NA, cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
 add_label(0.01, 0.1, 'B) News', font=2, cex=0.9)
 
 clip(-10, max(ratio.plot$xlim), 0, 100)
-abline(h=news.avg[1], col=alpha(cols[1], 0.5), lty=2)
-abline(h=news.avg[2], col=alpha(cols[2], 0.5), lty=2)
+abline(h=news.avg[1], col=alpha(cols[1], 0.5), lty=5)
+abline(h=news.avg[2], col=alpha(cols[2], 0.5), lty=5)
 # par(xpd=NA)
 # text(max(ratio.plot$xlim)+0.1, news.avg[1], label=round(news.avg[1], 2), col='grey',cex=0.8)
 
@@ -107,13 +123,21 @@ with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Closed',],
 with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Open',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
 			scol=cols[2], col=cols[2], add=TRUE))
+with(ratio.plot[ratio.plot$source=='twitter',][1:2,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(ratio.plot[ratio.plot$source=='twitter',][3:4,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(ratio.plot[ratio.plot$source=='twitter',][5:6,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(ratio.plot[ratio.plot$source=='twitter',][7:8,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
 axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=NA, cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
 add_label(0.01, 0.1, 'C) Twitter', font=2, cex=0.9)
 
 clip(-10, max(ratio.plot$xlim), 0, 100)
-abline(h=twitter.avg[1], col=alpha(cols[1], 0.5), lty=2)
-abline(h=twitter.avg[2], col=alpha(cols[2], 0.5), lty=2)
+abline(h=twitter.avg[1], col=alpha(cols[1], 0.5), lty=5)
+abline(h=twitter.avg[2], col=alpha(cols[2], 0.5), lty=5)
 # par(xpd=NA)
 # text(max(ratio.plot$xlim)+0.1, twitter.avg[1], label=round(twitter.avg[1], 2), col='grey',cex=0.8)
 
@@ -127,13 +151,21 @@ with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Closed',],
 with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Open',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
 			scol=cols[2], col=cols[2], add=TRUE))
+with(ratio.plot[ratio.plot$source=='policy',][1:2,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(ratio.plot[ratio.plot$source=='policy',][3:4,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(ratio.plot[ratio.plot$source=='policy',][5:6,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
+with(ratio.plot[ratio.plot$source=='policy',][7:8,], 
+	segments(xlim[1], p[1], xlim[2], p[2], col='grey', lty=1))
 axis(1, at=unique(ratio.plot$SJRfac.scaled), labels=bin.labs, cex.axis=cx.ax)
 axis(2, cex.axis=cx.ax)
 add_label(0.01, 0.1, 'D) Policy', font=2, cex=0.9)
 
 clip(-10, max(ratio.plot$xlim), 0, 100)
-abline(h=policy.avg[1], col=alpha(cols[1], 0.5), lty=2)
-abline(h=policy.avg[2], col=alpha(cols[2], 0.5), lty=2)
+abline(h=policy.avg[1], col=alpha(cols[1], 0.5), lty=5)
+abline(h=policy.avg[2], col=alpha(cols[2], 0.5), lty=5)
 # par(xpd=NA)
 # text(max(ratio.plot$xlim)+0.1, policy.avg[1], label=round(policy.avg[1], 2), col='grey',cex=0.8)
 
