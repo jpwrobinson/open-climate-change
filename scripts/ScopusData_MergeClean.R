@@ -113,6 +113,18 @@ write.csv(journal.list, file='Data/climate_journals.csv')
 
 
 
+## fair to just take the journals with highest number of papers?
+journal.list.100<-t$Source.title[t$Authors>100] ## n = 53
+journal.list.100<-data.frame(journal=journal.list.100)
+## add ISSN for altmetric search
+journal.list.100$ISSN<-j.dat$E.ISSN[match(journal.list.100$journal, j.dat$Source.Title)]
+journal.list.100$ISSN[is.na(journal.list.100$ISSN)]<-j.dat$Print.ISSN[match(journal.list.100$journal[is.na(journal.list.100$ISSN)], j.dat$Source.Title)]
+
+write.csv(journal.list.100, file='Data/climate_journals_threshold_100.csv')
+
+## what did our first journal threshold miss?
+journal.list.100$journal[!journal.list.100$journal %in% journal.list$journal]
+
 ############################################################
 ############################################################
 ############################################################
@@ -122,10 +134,11 @@ scop<-read.csv('Data/ScopusOAData_20180214TT.csv')
 
 ### Need to subset to relevant climate + ecology journals
 
-journals<-read.csv(file='Data/climate_journals.csv')
+journals<-read.csv(file='Data/climate_journals_threshold_100.csv')
 
 scop<-scop[scop$Source.title %in% journals$journal,]
-dim(scop) ## 57610 rows
+dim(scop) ## 57610 rows (100 threshold)
+## 73,362 rows (200 threshold)
 
 save(scop, file='Data/scopus_OA_climate_clean.Rdata')
 

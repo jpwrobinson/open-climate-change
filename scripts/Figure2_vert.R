@@ -28,7 +28,6 @@ pred2<-expand.grid(OA =unique(mod.dat$OA), jour.bin.scaled=0, Year = 2007, Sourc
 scopus.avg<-predict(fit5a, newdata=pred2, re.form = NA)
 
 
-
 ## load altmetric data
 load('Data/altmetric_glmer_fit.Rdata')
 

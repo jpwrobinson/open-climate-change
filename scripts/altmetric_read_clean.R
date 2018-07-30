@@ -46,7 +46,7 @@ alt$Details.Page.URL<-NULL
 colnames(alt)[colnames(alt)=='Journal.Collection.Title']<-'Journal'
 
 ## scopus entries
-load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - journals with > 200 papers in last 10 years
+load("./Data/scopus_OA_climate_clean.Rdata")  ## scopus data filtered by Jimmy - journals with > 100 papers in last 10 years
 
 ## add OA info to altmetric dataframe
 alt$OA<-scop$OA[match(alt$DOI,scop$DOI)]

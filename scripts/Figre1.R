@@ -27,7 +27,8 @@ dat<-merge(dat,j.dat[,c("Source.title","bin")],by.x="Source.title",by.y="Source.
 names(dat)
 
 ## summary of open access over time
-names(dat)
+dim(j.dat)
+
 
 sum.dat<-ddply(dat,.(Year,bin),summarize,
                OpenArt = length(OA[which(OA==T)]),
@@ -47,7 +48,7 @@ line1<-sum.dat %>% filter(Year == 2016 & bin == 'A')
 line2<-sum.dat %>% filter(Year == 2016 & bin == 'B')
 line3<-sum.dat %>% filter(Year == 2016 & bin == 'C')
 line4<-sum.dat %>% filter(Year == 2016 & bin == 'D')
-quant.labs<-c('0.1-1.2', '1.2-1.7', '1.7-2.7', '2.7-18.1')
+# quant.labs<-c('0.1-1.2', '1.2-1.7', '1.7-2.7', '2.7-18.1')
 bin.labs<-c('Low', 'Medium', 'High', 'Very high')
 tot.lab<-sum.totdat[10,2]/sum.totdat[10,4]*100
 
@@ -61,10 +62,10 @@ p1f<-p1 + theme_classic() +
         legend.text = element_text(size=4),
         legend.title = element_text(size=4),
         legend.key.height = unit(6,units="points")) +
-  lims(y=c(0, 45)) +
+  lims(y=c(0, 35)) +
   geom_line(aes(x=Year,y=OpenPer,colour=bin),lwd=0.5) + 
   geom_line(aes(x=Year,y=(OpenArt/Tot*100)),data=sum.totdat,
-            lwd=0.9) +
+            lwd=0.8) +
   ylab("OA publications (%)") + 
   coord_cartesian(expand=F) + 
   scale_x_continuous(breaks=seq(2008, 2016, 2), labels=seq(2008, 2016, 2), limits= c(2007, 2017)) +

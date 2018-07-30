@@ -39,3 +39,4 @@ journal.list$ISSN<-j.dat$E.ISSN[match(journal.list$journal, j.dat$Source.Title)]
 journal.list$ISSN[is.na(journal.list$ISSN)]<-j.dat$Print.ISSN[match(journal.list$journal[is.na(journal.list$ISSN)], j.dat$Source.Title)]
 
 write.csv(journal.list, file='Data/climate_journals.csv')
+
