@@ -81,14 +81,14 @@ axis(2, at=c(1, log10(25), log10(50)), labels=c(10, 25, 50), cex.axis=cx.ax, tcl
 axis(2, xBig , labels=rep("", length(xBig)), tcl=-0.4)
 add_label(0.01, 0.1, 'A) Citations', font=2, cex=0.9)
 
-clip(-10, max(ratio.plot$xlim), 0, 100)
+clip(-10, max(pred$xlim), 0, 100)
 abline(h=scopus.avg[1], col=alpha(cols[1], 0.5), lty=5)
 abline(h=scopus.avg[2], col=alpha(cols[2], 0.5), lty=5)
 
 ## news
 with(ratio.plot[ratio.plot$source=='news' & ratio.plot$OA=='Closed',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
-			axes=F, xlim=c(-1.5, 1.5), xlab='', ylab='', ylim=c(0, 0.5),
+			axes=F, xlim=c(-3.4, 0.8), xlab='', ylab='', ylim=c(0, 1.8),
 			scol=cols[1], col=cols[1]))
 with(ratio.plot[ratio.plot$source=='news' & ratio.plot$OA=='Open',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
@@ -117,7 +117,7 @@ abline(h=news.avg[2], col=alpha(cols[2], 0.5), lty=5)
 ## twitter
 with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Closed',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
-			axes=F, xlim=c(-1.5, 1.5), xlab='', ylab='', ylim=c(0,5),
+			axes=F, xlim=c(-3.4, 0.8), xlab='', ylab='', ylim=c(0,5),
 			scol=cols[1], col=cols[1]))
 with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Open',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
@@ -145,7 +145,7 @@ abline(h=twitter.avg[2], col=alpha(cols[2], 0.5), lty=5)
 ## policy
 with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Closed',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
-			axes=F, xlim=c(-1.5, 1.5), xlab='', ylab='', ylim=c(0.1,0.5),
+			axes=F, xlim=c(-3.4, 0.8), xlab='', ylab='', ylim=c(0.1,0.5),
 			scol=cols[1], col=cols[1]))
 with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Open',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,

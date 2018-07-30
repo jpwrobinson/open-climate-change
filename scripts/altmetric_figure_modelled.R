@@ -18,75 +18,121 @@ load(file='Data/altmetric_OA_clean.Rdata')
 names(alt)
 
 ## Summary stats for journals per bin
-unique(alt$Journal[alt$SJRfac=='A']) ## n = 24
-aggregate(Journal ~ OA, alt[alt$SJRfac=='A',], function(x)length(unique(x))) ## 12 open, 22 closed
+unique(alt$Journal[alt$SJRfac=='A']) ## n = 45
+aggregate(Journal ~ OA, alt[alt$SJRfac=='A',], function(x)length(unique(x))) ## 12 open, 40 closed
 
-unique(alt$Journal[alt$SJRfac=='B']) ## n = 29
-aggregate(Journal ~ OA, alt[alt$SJRfac=='B',], function(x)length(unique(x))) ## 16 open, 24 closed
+unique(alt$Journal[alt$SJRfac=='B']) ## n = 55
+aggregate(Journal ~ OA, alt[alt$SJRfac=='B',], function(x)length(unique(x))) ## 20 open, 50 closed
 
-unique(alt$Journal[alt$SJRfac=='C']) ## n = 21
-aggregate(Journal ~ OA, alt[alt$SJRfac=='C',], function(x)length(unique(x))) ## 14 open, 17 closed
+unique(alt$Journal[alt$SJRfac=='C']) ## n = 51
+aggregate(Journal ~ OA, alt[alt$SJRfac=='C',], function(x)length(unique(x))) ## 28 open, 44 closed
 
-unique(alt$Journal[alt$SJRfac=='D']) ## n = 23
-aggregate(Journal ~ OA, alt[alt$SJRfac=='D',], function(x)length(unique(x))) ## 10 open, 20 closed
+unique(alt$Journal[alt$SJRfac=='D']) ## n = 47
+aggregate(Journal ~ OA, alt[alt$SJRfac=='D',], function(x)length(unique(x))) ## 36 open, 22 closed
 
 
 t<-alt[alt$Policy.mentions>0,]
-ggplot(t, aes(year, Policy.mentions, col=OA))+ geom_point()
+# ggplot(t, aes(year, Policy.mentions, col=OA))+ geom_point()
 
-dim(t[t$OA=='TRUE',]) ## 112 OA policy mentions
+dim(t[t$OA=='TRUE',]) ## 140 OA policy mentions
+
+## check number of pubs per journal per year
+alt <- alt %>% group_by(year, Journal) %>% mutate(nNews = length(News.mentions[News.mentions > 0]),
+												  nTwitter = length(Twitter.mentions[Twitter.mentions>0]), 
+												  nPolicy = length(Policy.mentions[Policy.mentions>0]))
+
+
+
 
 ## get mean mentions by OA + bin
-ratio<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
+news.dat<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
+	filter(nNews > 2) %>%
 	group_by(SJRfac, OA, Journal, year) %>% 
+	# complete(Journal, nesting(source, OA, SJRfac, year), fill=list(News.mentions=0, )) %>% 
 	summarise(news = mean(News.mentions), 
 				policy=mean(Policy.mentions), 
 				twitter=mean(Twitter.mentions)) %>%
-	gather(source, mentions, -SJRfac, -OA, -Journal, -year) 
-
+	gather(source, mentions, -SJRfac, -OA, -Journal, -year) %>%
+	mutate(mentions10 = log10(mentions+1))
 
 ## add zeroes for cases with no mentions in a given year * journal quantile
-ratio$mentions[is.na(ratio$mentions)]<-0
+news.dat$mentions[is.na(news.dat$mentions)]<-0
+news.dat$SJRfac.scaled<-scale(as.numeric(news.dat$SJRfac))
 
-ratio$SJRfac.scaled<-scale(as.numeric(ratio$SJRfac))
-# ggplot(ratio, aes(SJRfac, Closed, col=source))+geom_point() + facet_wrap (~source, scales='free') + 
-# 		geom_point(aes(SJRfac, Open, col=source), shape=2)
-
+# ggplot(news.dat, aes(SJRfac, mentions)) + geom_point() + facet_wrap(~source, scales='free')
 
 ### gather data for base figure
-# ratio<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
+# news.dat<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
 # 	select(News.mentions, Policy.mentions, Twitter.mentions, OA, SJRfac, year, Journal) %>%
 # 	gather(source, mentions, -SJRfac, -OA, -year, -Journal) 
 
 library(lme4)
+
 news<-glmer(mentions ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal),family='poisson', 
-			ratio[ratio$source=='news',])
+			news.dat[news.dat$source=='news',])
 summary(news)
 hist(resid(news))
+plot(fitted(news), news.dat$mentions[news.dat$source=='news'])
 
 
-news.dat<-expand.grid(OA = unique(ratio$OA), SJRfac.scaled=unique(ratio$SJRfac.scaled), year = 2008, Journal='Ecology')
+news.dat<-expand.grid(OA = unique(news.dat$OA), SJRfac.scaled=unique(news.dat$SJRfac.scaled), year = 2010, Journal='Nature')
 news.dat$p<-predict(news, newdat=news.dat, re.form=NA, type='response')
 news.dat$source<-'news'
 ggplot(news.dat, aes(SJRfac.scaled, p, col=OA)) + geom_point() + labs(y = 'news mentions')
 
 
+## get mean mentions by OA + bin
+twitter.dat<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
+	filter(nNews > 2) %>%
+	group_by(SJRfac, OA, Journal, year) %>% 
+	# complete(Journal, nesting(source, OA, SJRfac, year), fill=list(News.mentions=0, )) %>% 
+	summarise(news = mean(News.mentions), 
+				policy=mean(Policy.mentions), 
+				twitter=mean(Twitter.mentions)) %>%
+	gather(source, mentions, -SJRfac, -OA, -Journal, -year) %>%
+	mutate(mentions10 = log10(mentions+1))
+
+## add zeroes for cases with no mentions in a given year * journal quantile
+twitter.dat$mentions[is.na(twitter.dat$mentions)]<-0
+twitter.dat$SJRfac.scaled<-scale(as.numeric(twitter.dat$SJRfac))
+
+
 twitter<-glmer(mentions ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal),family='poisson', 
-			ratio[ratio$source=='twitter',])
+			twitter.dat[twitter.dat$source=='twitter',])
 summary(twitter)
 hist(resid(twitter))
+plot(fitted(twitter), twitter.dat$mentions[twitter.dat$source=='twitter'])
 
-twitter.dat<-expand.grid(OA = unique(ratio$OA), SJRfac.scaled=unique(ratio$SJRfac.scaled), year = 2010, Journal='Nature')
+
+
+twitter.dat<-expand.grid(OA = unique(twitter.dat$OA), SJRfac.scaled=unique(twitter.dat$SJRfac.scaled), year = 2010, Journal='Nature')
 twitter.dat$p<-predict(twitter, newdat=twitter.dat, re.form=NA, type='response')
 twitter.dat$source<-'twitter'
 ggplot(twitter.dat, aes(SJRfac.scaled, p, col=OA)) + geom_point() + labs(y = 'twitter mentions')
 
 
+## get mean mentions by OA + bin
+policy.dat<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
+	filter(nNews > 2) %>%
+	group_by(SJRfac, OA, Journal, year) %>% 
+	# complete(Journal, nesting(source, OA, SJRfac, year), fill=list(News.mentions=0, )) %>% 
+	summarise(news = mean(News.mentions), 
+				policy=mean(Policy.mentions), 
+				twitter=mean(Twitter.mentions)) %>%
+	gather(source, mentions, -SJRfac, -OA, -Journal, -year) %>%
+	mutate(mentions10 = log10(mentions+1))
+
+## add zeroes for cases with no mentions in a given year * journal quantile
+policy.dat$mentions[is.na(policy.dat$mentions)]<-0
+policy.dat$SJRfac.scaled<-scale(as.numeric(policy.dat$SJRfac))
+
+
+
 policy<-glmer(mentions ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal),family='poisson', 
-			ratio[ratio$source=='policy',])
+			policy.dat[policy.dat$source=='policy',])
 hist(resid(policy))
 
-policy.dat<-expand.grid(OA = unique(ratio$OA), SJRfac.scaled=unique(ratio$SJRfac.scaled), year = 2010, Journal='Nature')
+policy.dat<-expand.grid(OA = unique(policy.dat$OA), SJRfac.scaled=unique(policy.dat$SJRfac.scaled), year = 2010, Journal='Nature')
 policy.dat$p<-predict(policy, newdat=policy.dat, re.form=NA, type='response')
 policy.dat$source<-'policy'
 ggplot(policy.dat, aes(SJRfac.scaled, p, col=OA)) + geom_point() + labs(y = 'policy mentions')

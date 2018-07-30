@@ -57,6 +57,9 @@ dim(alt[is.na(alt$OA),])
 ## drop missing papers
 alt <- alt[!is.na(alt$OA),]
 
+## drop news papers
+alt <- alt[alt$Output.Type == 'Article',]
+
 ## add Year for modelling grouping/temporal plots
 alt$year<-as.numeric(str_split_fixed(as.character(alt$Publication.Date), '-', 3)[,1])
 
