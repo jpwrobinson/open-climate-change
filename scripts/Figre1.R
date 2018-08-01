@@ -90,6 +90,29 @@ dev.off()
 
 
 
+## summary for certain statistics for paper - proportion of OA to Scientific Reports and PLoSONE
+
+tdat<-subset(dat,subset = bin %in% c("B","C"))
+tdat.B<-subset(dat,subset = bin == c("B"))
+tdat.C<-subset(dat,subset = bin == c("C"))
+
+
+PLOS<-nrow(tdat[which(tdat$Source.title == "PLoS ONE"),])
+SR<-nrow(tdat[which(tdat$Source.title == "Scientific Reports"),])
+
+OA.B<-nrow(tdat.B[which(tdat.B$OA == T),])
+OA.C<-nrow(tdat.C[which(tdat.C$OA == T),])
+
+PLOS/nrow(tdat.B)
+SR/nrow(tdat.C)
+
+PLOS/OA.B
+SR/OA.C
+
+
+
+
+
 
 # ## Not use below ##
 

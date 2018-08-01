@@ -103,7 +103,7 @@ scop<-read.csv("./Data/ScopusOAData_20180214TT.csv")
 t<-aggregate(Authors ~ Source.title, scop, length)
 
 ## fair to just take the journals with highest number of papers?
-journal.list<-t$Source.title[t$Authors>200] ## n = 116
+journal.list<-t$Source.title[t$Authors>100] ## n = 116
 journal.list<-data.frame(journal=journal.list)
 ## add ISSN for altmetric search
 journal.list$ISSN<-j.dat$E.ISSN[match(journal.list$journal, j.dat$Source.Title)]
