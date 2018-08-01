@@ -117,7 +117,7 @@ abline(h=news.avg[2], col=alpha(cols[2], 0.5), lty=5)
 ## twitter
 with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Closed',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
-			axes=F, xlim=c(-3.4, 0.8), xlab='', ylab='', ylim=c(0,5),
+			axes=F, xlim=c(-3.4, 0.8), xlab='', ylab='', ylim=c(0,10),
 			scol=cols[1], col=cols[1]))
 with(ratio.plot[ratio.plot$source=='twitter' & ratio.plot$OA=='Open',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
@@ -145,7 +145,7 @@ abline(h=twitter.avg[2], col=alpha(cols[2], 0.5), lty=5)
 ## policy
 with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Closed',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0, 
-			axes=F, xlim=c(-3.4, 0.8), xlab='', ylab='', ylim=c(0.1,0.5),
+			axes=F, xlim=c(-3.4, 0.8), xlab='', ylab='', ylim=c(0.1,0.7),
 			scol=cols[1], col=cols[1]))
 with(ratio.plot[ratio.plot$source=='policy' & ratio.plot$OA=='Open',], 
 		plotCI(xlim, p, ui=p, li=p, pch=19,cex=1.5, sfrac=0,
@@ -171,7 +171,7 @@ abline(h=policy.avg[2], col=alpha(cols[2], 0.5), lty=5)
 
 
 
-mtext(2, text='Mean #', line=0.35, cex=0.8, outer=TRUE)
+mtext(2, text='Mean citations/mentions', line=0.35, cex=0.8, outer=TRUE)
 mtext(1, text='Journal rank', line=1.2, cex=0.8, outer=TRUE)
 
 dev.off()
