@@ -59,6 +59,10 @@ news.dat<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
 news.dat$mentions[is.na(news.dat$mentions)]<-0
 news.dat$SJRfac.scaled<-scale(as.numeric(news.dat$SJRfac))
 
+## lots of years dropped when n papers is low
+with(news.dat, table(Journal))
+data.frame(alt[alt$Journal == 'Ecology Letters',])
+
 # ggplot(news.dat, aes(SJRfac, mentions)) + geom_point() + facet_wrap(~source, scales='free')
 
 ### gather data for base figure
@@ -68,7 +72,7 @@ news.dat$SJRfac.scaled<-scale(as.numeric(news.dat$SJRfac))
 
 library(lme4)
 
-news<-glmer(mentions ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal),family='poisson', 
+news<-lmer(mentions10 ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal), 
 			news.dat[news.dat$source=='news',])
 summary(news)
 hist(resid(news))
@@ -78,7 +82,7 @@ plot(fitted(news), news.dat$mentions[news.dat$source=='news'])
 news.dat<-expand.grid(OA = unique(news.dat$OA), SJRfac.scaled=unique(news.dat$SJRfac.scaled), year = 2010, Journal='Nature')
 news.dat$p<-predict(news, newdat=news.dat, re.form=NA, type='response')
 news.dat$source<-'news'
-ggplot(news.dat, aes(SJRfac.scaled, p, col=OA)) + geom_point() + labs(y = 'news mentions')
+ggplot(news.dat, aes(SJRfac.scaled, 10^p, col=OA)) + geom_point() + labs(y = 'news mentions')
 
 
 ## get mean mentions by OA + bin
@@ -97,7 +101,7 @@ twitter.dat$mentions[is.na(twitter.dat$mentions)]<-0
 twitter.dat$SJRfac.scaled<-scale(as.numeric(twitter.dat$SJRfac))
 
 
-twitter<-glmer(mentions ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal),family='poisson', 
+twitter<-lmer(mentions10 ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal),
 			twitter.dat[twitter.dat$source=='twitter',])
 summary(twitter)
 hist(resid(twitter))
@@ -126,16 +130,16 @@ policy.dat<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
 policy.dat$mentions[is.na(policy.dat$mentions)]<-0
 policy.dat$SJRfac.scaled<-scale(as.numeric(policy.dat$SJRfac))
 
+ggplot(policy.dat, aes(year, mentions, col=OA)) + geom_point() + facet_wrap(~SJRfac)
 
-
-policy<-glmer(mentions ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal),family='poisson', 
+policy<-lmer(mentions10 ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal),
 			policy.dat[policy.dat$source=='policy',])
 hist(resid(policy))
 
 policy.dat<-expand.grid(OA = unique(policy.dat$OA), SJRfac.scaled=unique(policy.dat$SJRfac.scaled), year = 2010, Journal='Nature')
 policy.dat$p<-predict(policy, newdat=policy.dat, re.form=NA, type='response')
 policy.dat$source<-'policy'
-ggplot(policy.dat, aes(SJRfac.scaled, p, col=OA)) + geom_point() + labs(y = 'policy mentions')
+ggplot(policy.dat, aes(SJRfac.scaled, 10^p, col=OA)) + geom_point() + labs(y = 'policy mentions')
 
 ratio.plot<-rbind(news.dat, twitter.dat, policy.dat)
 ratio.plot$xlim<-ifelse(ratio.plot$OA=='Open', as.numeric(ratio.plot$SJRfac.scaled)+0.1, as.numeric(ratio.plot$SJRfac)-0.1)
