@@ -46,24 +46,29 @@ alt <- alt %>% group_by(year, Journal) %>% mutate(nNews = length(News.mentions[N
 
 ## get mean mentions by OA + bin
 news.dat<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
-	filter(nNews > 2) %>%
+	# filter(nNews > 2) %>%
 	group_by(SJRfac, OA, Journal, year) %>% 
 	# complete(Journal, nesting(source, OA, SJRfac, year), fill=list(News.mentions=0, )) %>% 
 	summarise(news = mean(News.mentions), 
 				policy=mean(Policy.mentions), 
 				twitter=mean(Twitter.mentions)) %>%
-	gather(source, mentions, -SJRfac, -OA, -Journal, -year) %>%
-	mutate(mentions10 = log10(mentions+1))
+	gather(source, mentions, -SJRfac, -OA, -Journal, -year) #%>%
+	# mutate(mentions10 = log10(mentions+1))
 
 ## add zeroes for cases with no mentions in a given year * journal quantile
 news.dat$mentions[is.na(news.dat$mentions)]<-0
+
+## or drop all NAs
+news.dat<-news.dat[news.dat$mentions!=0,]
 news.dat$SJRfac.scaled<-scale(as.numeric(news.dat$SJRfac))
+news.dat$mentions10<-log10(news.dat$mentions)
+
 
 ## lots of years dropped when n papers is low
-with(news.dat, table(Journal))
-data.frame(alt[alt$Journal == 'Ecology Letters',])
+# with(news.dat, table(Journal))
+# data.frame(alt[alt$Journal == 'Ecology Letters',])
 
-# ggplot(news.dat, aes(SJRfac, mentions)) + geom_point() + facet_wrap(~source, scales='free')
+ggplot(news.dat, aes(SJRfac, mentions)) + geom_point() + facet_wrap(~source, scales='free')
 
 ### gather data for base figure
 # news.dat<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
@@ -73,71 +78,84 @@ data.frame(alt[alt$Journal == 'Ecology Letters',])
 library(lme4)
 
 news<-lmer(mentions10 ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal), 
-			news.dat[news.dat$source=='news',])
+			news.dat[news.dat$source=='news',], )
+
 summary(news)
 hist(resid(news))
-plot(fitted(news), news.dat$mentions[news.dat$source=='news'])
+plot(fitted(news), news.dat$mentions10[news.dat$source=='news'])
 
 
 news.dat<-expand.grid(OA = unique(news.dat$OA), SJRfac.scaled=unique(news.dat$SJRfac.scaled), year = 2010, Journal='Nature')
 news.dat$p<-predict(news, newdat=news.dat, re.form=NA, type='response')
+news.dat$p10<-10^news.dat$p
 news.dat$source<-'news'
 ggplot(news.dat, aes(SJRfac.scaled, 10^p, col=OA)) + geom_point() + labs(y = 'news mentions')
 
 
 ## get mean mentions by OA + bin
 twitter.dat<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
-	filter(nNews > 2) %>%
+	# filter(nNews > 2) %>%
 	group_by(SJRfac, OA, Journal, year) %>% 
 	# complete(Journal, nesting(source, OA, SJRfac, year), fill=list(News.mentions=0, )) %>% 
 	summarise(news = mean(News.mentions), 
 				policy=mean(Policy.mentions), 
 				twitter=mean(Twitter.mentions)) %>%
-	gather(source, mentions, -SJRfac, -OA, -Journal, -year) %>%
-	mutate(mentions10 = log10(mentions+1))
+	gather(source, mentions, -SJRfac, -OA, -Journal, -year)# %>%
+	# mutate(mentions10 = log10(mentions+1))
 
 ## add zeroes for cases with no mentions in a given year * journal quantile
 twitter.dat$mentions[is.na(twitter.dat$mentions)]<-0
-twitter.dat$SJRfac.scaled<-scale(as.numeric(twitter.dat$SJRfac))
 
+## or drop all NAs
+twitter.dat<-twitter.dat[twitter.dat$mentions!=0,]
+twitter.dat$SJRfac.scaled<-scale(as.numeric(twitter.dat$SJRfac))
+twitter.dat$mentions10<-log10(twitter.dat$mentions)
 
 twitter<-lmer(mentions10 ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal),
 			twitter.dat[twitter.dat$source=='twitter',])
 summary(twitter)
 hist(resid(twitter))
-plot(fitted(twitter), twitter.dat$mentions[twitter.dat$source=='twitter'])
+plot(fitted(twitter), twitter.dat$mentions10[twitter.dat$source=='twitter'])
 
 
 
 twitter.dat<-expand.grid(OA = unique(twitter.dat$OA), SJRfac.scaled=unique(twitter.dat$SJRfac.scaled), year = 2010, Journal='Nature')
 twitter.dat$p<-predict(twitter, newdat=twitter.dat, re.form=NA, type='response')
+twitter.dat$p10<-10^twitter.dat$p
 twitter.dat$source<-'twitter'
-ggplot(twitter.dat, aes(SJRfac.scaled, p, col=OA)) + geom_point() + labs(y = 'twitter mentions')
+ggplot(twitter.dat, aes(SJRfac.scaled, 10^p, col=OA)) + geom_point() + labs(y = 'twitter mentions')
 
 
 ## get mean mentions by OA + bin
 policy.dat<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
-	filter(nNews > 2) %>%
+	# filter(nNews > 2) %>%
 	group_by(SJRfac, OA, Journal, year) %>% 
 	# complete(Journal, nesting(source, OA, SJRfac, year), fill=list(News.mentions=0, )) %>% 
 	summarise(news = mean(News.mentions), 
 				policy=mean(Policy.mentions), 
 				twitter=mean(Twitter.mentions)) %>%
-	gather(source, mentions, -SJRfac, -OA, -Journal, -year) %>%
-	mutate(mentions10 = log10(mentions+1))
+	gather(source, mentions, -SJRfac, -OA, -Journal, -year) #%>%
+	# mutate(mentions10 = log10(mentions+1))
 
 ## add zeroes for cases with no mentions in a given year * journal quantile
 policy.dat$mentions[is.na(policy.dat$mentions)]<-0
 policy.dat$SJRfac.scaled<-scale(as.numeric(policy.dat$SJRfac))
 
-ggplot(policy.dat, aes(year, mentions, col=OA)) + geom_point() + facet_wrap(~SJRfac)
+## or drop all NAs
+policy.dat<-policy.dat[policy.dat$mentions!=0,]
+
+policy.dat$mentions10<-log10(policy.dat$mentions)
+
+# ggplot(policy.dat, aes(year, log10(mentions), col=OA)) + geom_point() + facet_wrap(~SJRfac)
 
 policy<-lmer(mentions10 ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal),
 			policy.dat[policy.dat$source=='policy',])
 hist(resid(policy))
+plot(fitted(policy), policy.dat$mentions10[policy.dat$source=='policy'])
 
 policy.dat<-expand.grid(OA = unique(policy.dat$OA), SJRfac.scaled=unique(policy.dat$SJRfac.scaled), year = 2010, Journal='Nature')
 policy.dat$p<-predict(policy, newdat=policy.dat, re.form=NA, type='response')
+policy.dat$p10<-10^policy.dat$p
 policy.dat$source<-'policy'
 ggplot(policy.dat, aes(SJRfac.scaled, 10^p, col=OA)) + geom_point() + labs(y = 'policy mentions')
 
