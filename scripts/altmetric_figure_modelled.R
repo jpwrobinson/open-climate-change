@@ -68,7 +68,9 @@ news.dat$mentions10<-log10(news.dat$mentions)
 # with(news.dat, table(Journal))
 # data.frame(alt[alt$Journal == 'Ecology Letters',])
 
-ggplot(news.dat, aes(SJRfac, mentions)) + geom_point() + facet_wrap(~source, scales='free')
+ggplot(news.dat, aes(SJRfac, mentions, fill=OA)) + geom_boxplot() + 
+		facet_wrap(~source, scales='free') +
+		scale_y_log10()
 
 ### gather data for base figure
 # news.dat<-alt %>% mutate(OA = ifelse(OA == TRUE, 'Open', 'Closed')) %>%
@@ -80,9 +82,28 @@ library(lme4)
 news<-lmer(mentions10 ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal), 
 			news.dat[news.dat$source=='news',], )
 
+# ## trying dummy approach
+# news.dat$Adummy<-ifelse(news.dat$SJRfac == 'A', 1, 0)
+# news.dat$Bdummy<-ifelse(news.dat$SJRfac == 'B', 1, 0)
+# news.dat$Cdummy<-ifelse(news.dat$SJRfac == 'C', 1, 0)
+# news.dat$Ddummy<-ifelse(news.dat$SJRfac == 'D', 1, 0)
+
+
+# news1<-lmer(mentions10 ~ OA * Adummy + OA*Bdummy + OA*Cdummy + OA*Ddummy + (1 | year) + (1 | Journal), 
+# 			news.dat[news.dat$source=='news',], )
+
+# news2<-lmer(mentions10 ~ OA * SJRfac + (1 | year) + (1 | Journal), 
+# 			news.dat[news.dat$source=='news',], )
+
+
+ # plot(fitted(news), fitted(news2))
+
+
 summary(news)
 hist(resid(news))
-plot(fitted(news), news.dat$mentions10[news.dat$source=='news'])
+plot(fitted(news), news.dat$mentions10[news.dat$source=='news'], pch=21, 
+				bg=news.dat$SJRfac[news.dat$source=='news'])
+legend('bottomright', legend= c('A', 'B', 'C', 'D'), pt.bg = 1:4, pch = 21)
 
 
 news.dat<-expand.grid(OA = unique(news.dat$OA), SJRfac.scaled=unique(news.dat$SJRfac.scaled), year = 2010, Journal='Nature')
@@ -115,8 +136,29 @@ twitter<-lmer(mentions10 ~ OA * SJRfac.scaled + (1 | year) + (1 | Journal),
 			twitter.dat[twitter.dat$source=='twitter',])
 summary(twitter)
 hist(resid(twitter))
-plot(fitted(twitter), twitter.dat$mentions10[twitter.dat$source=='twitter'])
+plot(fitted(twitter), twitter.dat$mentions10[twitter.dat$source=='twitter'], 
+	pch=as.numeric(as.factor(twitter.dat$OA[twitter.dat$source=='twitter'])), 
+				col=twitter.dat$SJRfac[twitter.dat$source=='twitter'])
+legend('bottomright', legend= c('A', 'B', 'C', 'D', 'Open', 'Closed'), col = c(1:4, 1, 1), pch = c(1,1,1,1,2))
+abline(0,1)
 
+
+## trying dummy approach
+twitter.dat$Adummy<-ifelse(twitter.dat$SJRfac == 'A', 1, 0)
+twitter.dat$Bdummy<-ifelse(twitter.dat$SJRfac == 'B', 1, 0)
+twitter.dat$Cdummy<-ifelse(twitter.dat$SJRfac == 'C', 1, 0)
+twitter.dat$Ddummy<-ifelse(twitter.dat$SJRfac == 'D', 1, 0)
+
+
+twitter1<-lmer(mentions10 ~ OA * Adummy + OA*Bdummy + OA*Cdummy + OA*Ddummy + (1 | year) + (1 | Journal), 
+			twitter.dat[twitter.dat$source=='twitter',], )
+
+twitter2<-lmer(mentions10 ~ OA * SJRfac + (1 | year) + (1 | Journal), 
+			twitter.dat[twitter.dat$source=='twitter',], )
+
+par(mfrow=c(1,2))
+ plot(fitted(twitter), fitted(twitter1), ylab='Dummy approach', xlab='Continuous approach')
+ plot(fitted(twitter), fitted(twitter2), ylab='Factor approach', xlab='Continuous approach')
 
 
 twitter.dat<-expand.grid(OA = unique(twitter.dat$OA), SJRfac.scaled=unique(twitter.dat$SJRfac.scaled), year = 2010, Journal='Nature')
