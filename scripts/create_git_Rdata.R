@@ -18,7 +18,11 @@ pred$Year<-NULL
 # pred$jour.bin.scaled<-NULmL
 pred$SJRbin<-rep(bin.labs, each =2)
 
-save(m.citations, pred, file='Data/scopus_lm_forgit.Rdata')
+
+scopus<-mod.dat
+
+
+save(m.citations, pred, scopus, file='Data/scopus_lm_forgit.Rdata')
 
 
 rm(list=ls())
