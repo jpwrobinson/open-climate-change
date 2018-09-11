@@ -47,7 +47,9 @@ quant.labs<-c('0.1-1.2', '1.2-1.7', '1.7-2.7', '2.7-18.1')
 
 
 ## plot
-pdf(file='figures/Figure2_vert.pdf', height=6.5, width=2.5)
+#pdf(file='figures/Figure2_vert.pdf', height=6.5, width=2.5)
+jpeg(file="./figures/Figure2_vert.jpeg", height=6.5, width=2.5,units="in",res=1000)
+
 layout(matrix(c(1,2,3,4), nrow=4))
 cols<-c('#d8b365', '#5ab4ac')
 cx.ax=0.9

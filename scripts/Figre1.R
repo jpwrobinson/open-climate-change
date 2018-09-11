@@ -86,7 +86,9 @@ pdf(file="./figures/Figure1.pdf", height=2, width=3)
 p1f
 dev.off()
 
-
+jpeg(file="./figures/Figure1.jpeg", height=2, width=3,units="in",res=1000)
+p1f
+dev.off()
 
 
 
